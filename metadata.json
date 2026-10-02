@@ -1,0 +1,6 @@
+{
+  "name": "STACKY // Next-Gen European Fleet & Logistics System",
+  "description": "High-throughput European logistics terminal for TEN-T corridor freight dispatch, HGV telemetry, EC 561/2006 smart tachograph compliance, and Directive 96/53/EC payload balancing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
