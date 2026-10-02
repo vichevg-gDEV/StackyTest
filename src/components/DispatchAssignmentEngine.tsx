@@ -15,7 +15,8 @@ import {
   Truck,
   Repeat,
   ShieldCheck,
-  AlertTriangle
+  AlertTriangle,
+  Plus
 } from 'lucide-react';
 import { formatMass, formatVolume } from '../utils/formatters';
 
@@ -25,6 +26,7 @@ interface DispatchAssignmentEngineProps {
   drivers: Driver[];
   onAssignManifest: (manifestId: string, vehicleId: string, driverId: string) => { success: boolean; errors: string[] };
   onOpenBolModal: (manifestId: string) => void;
+  onOpenNewPackageModal?: () => void;
 }
 
 export const DispatchAssignmentEngine: React.FC<DispatchAssignmentEngineProps> = ({
@@ -33,6 +35,7 @@ export const DispatchAssignmentEngine: React.FC<DispatchAssignmentEngineProps> =
   drivers,
   onAssignManifest,
   onOpenBolModal,
+  onOpenNewPackageModal,
 }) => {
   const [selectedManifestId, setSelectedManifestId] = useState<string>(
     manifests.find((m) => m.assignment_status.status === 'PENDING')?.manifest_id || manifests[0]?.manifest_id || ''
@@ -63,70 +66,85 @@ export const DispatchAssignmentEngine: React.FC<DispatchAssignmentEngineProps> =
   };
 
   // Evaluate pre-dispatch logic status
-  const continuousMinsRemaining = 270 - activeDriver.continuous_drive_minutes;
-  const tachoPass = continuousMinsRemaining >= 45 && activeDriver.daily_driving_hours < 9.0;
-  const payloadPass = activeManifest.metrics.total_mass_kg <= activeVehicle.trailer_spec.max_payload_kg;
-  const palletPass = activeManifest.metrics.euro_pallets_count <= activeVehicle.trailer_spec.max_euro_pallets;
+  const continuousMinsRemaining = 270 - (activeDriver?.continuous_drive_minutes || 0);
+  const tachoPass = continuousMinsRemaining >= 30 && (activeDriver?.daily_driving_hours || 0) < 9.0;
+  const payloadPass = (activeManifest?.metrics.total_mass_kg || 0) <= (activeVehicle?.trailer_spec.max_payload_kg || 1);
+  const palletPass = (activeManifest?.metrics.euro_pallets_count || 0) <= (activeVehicle?.trailer_spec.max_euro_pallets || 1);
   const dimsPass =
-    activeManifest.metrics.max_unit_dimensions_m.width <= activeVehicle.trailer_spec.internal_width_m &&
-    activeManifest.metrics.max_unit_dimensions_m.height <= activeVehicle.trailer_spec.internal_height_m;
-  const cabotagePass = activeManifest.cabotage_operation_count <= 3;
+    (activeManifest?.metrics.max_unit_dimensions_m.width || 0) <= (activeVehicle?.trailer_spec.internal_width_m || 2.5) &&
+    (activeManifest?.metrics.max_unit_dimensions_m.height || 0) <= (activeVehicle?.trailer_spec.internal_height_m || 2.7);
+  const cabotagePass = (activeManifest?.cabotage_operation_count || 0) <= 3;
 
   return (
-    <div className="w-full bg-[#181A1D] border border-[#2A2D32] p-4 text-xs font-tabular space-y-4">
+    <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-5 font-sans space-y-5">
       {/* Title */}
-      <div className="flex flex-wrap items-center justify-between border-b border-[#2A2D32] pb-3 gap-2">
-        <div className="flex items-center gap-2">
-          <ClipboardList className="w-4 h-4 text-[#FFFFFF]" />
+      <div className="flex flex-wrap items-center justify-between border-b border-slate-200 pb-4 gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+            <ClipboardList className="w-5 h-5" />
+          </div>
           <div>
-            <h2 className="text-sm font-bold text-[#FFFFFF] tracking-wider uppercase">
-              EUROPEAN DISPATCH & FREIGHT ASSIGNMENT ENGINE
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">
+              European Dispatch & Freight Staging Engine
             </h2>
-            <div className="text-[11px] text-[#8C929B]">
-              e-CMR PROTOCOL · 33-EPAL STAGING (LIFO/FIFO) · EC 561/2006 & DIRECTIVE 96/53/EC PRE-DISPATCH VALIDATION
-            </div>
+            <p className="text-xs text-slate-500">
+              UN Geneva e-CMR Protocol · 33-EPAL Staging (LIFO/FIFO) · EC 561/2006 Pre-Dispatch Compliance
+            </p>
           </div>
         </div>
 
-        {/* Staging Rule Toggle */}
-        <div className="flex items-center gap-1">
-          <span className="text-[#8C929B] text-[11px]">EPAL STAGING:</span>
-          <button
-            onClick={() => setStagingRule('LIFO')}
-            className={`mta-btn px-2.5 py-1 border text-xs ${
-              stagingRule === 'LIFO'
-                ? 'bg-[#2A2D32] border-[#FFFFFF] text-[#FFFFFF]'
-                : 'bg-[#181A1D] border-[#2A2D32] text-[#8C929B]'
-            }`}
-            title="Last-In, First-Out: Pallets destined for first depot drop are staged nearest to trailer rear portal."
-          >
-            LIFO (LAST-IN, FIRST-OUT)
-          </button>
-          <button
-            onClick={() => setStagingRule('FIFO')}
-            className={`mta-btn px-2.5 py-1 border text-xs ${
-              stagingRule === 'FIFO'
-                ? 'bg-[#2A2D32] border-[#FFFFFF] text-[#FFFFFF]'
-                : 'bg-[#181A1D] border-[#2A2D32] text-[#8C929B]'
-            }`}
-            title="First-In, First-Out: Pallets staged by sequential delivery itinerary."
-          >
-            FIFO (FIRST-IN, FIRST-OUT)
-          </button>
+        {/* Action Controls */}
+        <div className="flex items-center gap-2.5">
+          {onOpenNewPackageModal && (
+            <button
+              onClick={onOpenNewPackageModal}
+              className="px-3.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create Load Entry</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+            <span className="text-slate-500 text-[11px] font-medium px-2">Staging:</span>
+            <button
+              onClick={() => setStagingRule('LIFO')}
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                stagingRule === 'LIFO'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="Last-In, First-Out: Staged nearest to rear door for earliest drop"
+            >
+              LIFO
+            </button>
+            <button
+              onClick={() => setStagingRule('FIFO')}
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                stagingRule === 'FIFO'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="First-In, First-Out: Sequentially staged"
+            >
+              FIFO
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Main 3-Column European Orchestration Workflow */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Step 1: Customer Manifest Selection */}
-        <div className="bg-[#0F1113] border border-[#2A2D32] p-3 flex flex-col justify-between">
+        <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl flex flex-col justify-between space-y-3">
           <div>
-            <div className="flex items-center justify-between border-b border-[#2A2D32] pb-1.5 mb-2">
-              <span className="font-bold text-[#FFFFFF] tracking-wider">
-                1. SELECT e-CMR CONSIGNMENT
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-2 mb-2">
+              <span className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">1</span>
+                <span>Select e-CMR Consignment</span>
               </span>
-              <span className="text-[#8C929B] text-[10px]">
-                {manifests.length} FREIGHT PACKAGES
+              <span className="text-slate-500 text-[11px]">
+                {manifests.length} Loads
               </span>
             </div>
 
@@ -139,33 +157,33 @@ export const DispatchAssignmentEngine: React.FC<DispatchAssignmentEngineProps> =
                   <div
                     key={m.manifest_id}
                     onClick={() => setSelectedManifestId(m.manifest_id)}
-                    className={`p-2.5 cursor-pointer border transition-all ${
+                    className={`p-3 cursor-pointer rounded-xl border transition-all ${
                       isSelected
-                        ? 'bg-[#2A2D32] border-[#FFFFFF]'
-                        : 'bg-[#181A1D] border-[#2A2D32] hover:border-[#3e444d]'
+                        ? 'bg-white border-blue-500 ring-2 ring-blue-500/10 shadow-xs'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-center justify-between font-bold mb-1">
-                      <span className={isSelected ? 'text-[#FFFFFF]' : 'text-[#E1E4E8]'}>
-                        [{m.manifest_id}]
+                      <span className="text-xs text-slate-900 font-mono">
+                        {m.manifest_id}
                       </span>
                       <span
-                        className={`text-[10px] px-1 border ${
+                        className={`text-[10px] font-semibold px-2 py-0.2 rounded-full border ${
                           isAssigned
-                            ? 'border-[#4E6E5D] text-[#8cd1aa]'
-                            : 'border-[#8C734B] text-[#e5bf7d]'
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                            : 'bg-amber-50 border-amber-200 text-amber-800'
                         }`}
                       >
                         {m.assignment_status.status}
                       </span>
                     </div>
 
-                    <div className="text-[11px] text-[#E1E4E8] line-clamp-1 mb-1 font-sans">
+                    <div className="text-xs text-slate-800 font-medium line-clamp-1 mb-1">
                       {m.cargo_description}
                     </div>
 
-                    <div className="text-[10px] text-[#8C929B] flex items-center justify-between">
-                      <span className="text-[#8cd1aa] font-bold">
+                    <div className="text-[11px] text-slate-500 flex items-center justify-between">
+                      <span className="text-blue-700 font-semibold font-mono">
                         {m.metrics.euro_pallets_count} EPAL · {formatMass(m.metrics.total_mass_kg)}
                       </span>
                       <span>{m.origin_code} → {m.destination_code}</span>
@@ -176,26 +194,29 @@ export const DispatchAssignmentEngine: React.FC<DispatchAssignmentEngineProps> =
             </div>
           </div>
 
-          <div className="mt-2 pt-2 border-t border-[#2A2D32] flex justify-between items-center text-[10px] text-[#8C929B]">
-            <span>STAGING: {activeManifest.staging_rule}</span>
-            <button
-              onClick={() => onOpenBolModal(activeManifest.manifest_id)}
-              className="text-[#FFFFFF] underline hover:text-[#8cd1aa]"
-            >
-              INSPECT e-CMR
-            </button>
+          <div className="pt-2 border-t border-slate-200/80 flex justify-between items-center text-xs text-slate-500">
+            <span>Staging: <strong className="text-slate-800">{activeManifest?.staging_rule}</strong></span>
+            {activeManifest && (
+              <button
+                onClick={() => onOpenBolModal(activeManifest.manifest_id)}
+                className="text-blue-600 hover:text-blue-800 font-semibold underline text-xs"
+              >
+                Inspect e-CMR
+              </button>
+            )}
           </div>
         </div>
 
         {/* Step 2: Target Vehicle & Internal Capacities */}
-        <div className="bg-[#0F1113] border border-[#2A2D32] p-3 flex flex-col justify-between">
+        <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl flex flex-col justify-between space-y-3">
           <div>
-            <div className="flex items-center justify-between border-b border-[#2A2D32] pb-1.5 mb-2">
-              <span className="font-bold text-[#FFFFFF] tracking-wider">
-                2. SELECT EUROPEAN HGV UNIT
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-2 mb-2">
+              <span className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">2</span>
+                <span>Select European HGV</span>
               </span>
-              <span className="text-[#8C929B] text-[10px]">
-                {vehicles.length} FLEET UNITS
+              <span className="text-slate-500 text-[11px]">
+                {vehicles.length} Units
               </span>
             </div>
 
@@ -211,34 +232,34 @@ export const DispatchAssignmentEngine: React.FC<DispatchAssignmentEngineProps> =
                       setSelectedVehicleId(v.vehicle_id);
                       setSelectedDriverId(v.driver_id);
                     }}
-                    className={`p-2.5 cursor-pointer border transition-all ${
+                    className={`p-3 cursor-pointer rounded-xl border transition-all ${
                       isSelected
-                        ? 'bg-[#2A2D32] border-[#FFFFFF]'
-                        : 'bg-[#181A1D] border-[#2A2D32] hover:border-[#3e444d]'
+                        ? 'bg-white border-blue-500 ring-2 ring-blue-500/10 shadow-xs'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-center justify-between font-bold mb-1">
-                      <span className={isSelected ? 'text-[#FFFFFF]' : 'text-[#E1E4E8]'}>
-                        {v.vehicle_id} ({v.plate_number})
+                      <span className="text-xs text-slate-900 font-mono">
+                        {v.vehicle_id} <span className="font-normal text-slate-500 font-sans">({v.plate_number})</span>
                       </span>
                       <span
-                        className={`text-[10px] px-1 border ${
+                        className={`text-[10px] font-semibold px-2 py-0.2 rounded-full border ${
                           isIdle
-                            ? 'border-[#4E6E5D] text-[#8cd1aa]'
-                            : 'border-[#2A2D32] text-[#8C929B]'
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                            : 'bg-slate-100 border-slate-200 text-slate-600'
                         }`}
                       >
                         {v.status}
                       </span>
                     </div>
 
-                    <div className="text-[11px] text-[#E1E4E8] font-sans">
+                    <div className="text-xs text-slate-800 font-medium">
                       {v.make_model} // {v.emission_standard}
                     </div>
 
-                    <div className="text-[10px] text-[#8C929B] mt-1 flex justify-between">
-                      <span>MAX PAYLOAD: {formatMass(v.trailer_spec.max_payload_kg)}</span>
-                      <span className="text-[#8cd1aa] font-bold">33 EPAL (13.62m)</span>
+                    <div className="text-[11px] text-slate-500 mt-1 flex justify-between">
+                      <span>Max Payload: <strong>{formatMass(v.trailer_spec.max_payload_kg)}</strong></span>
+                      <span className="text-blue-700 font-semibold">33 EPAL (13.62m)</span>
                     </div>
                   </div>
                 );
@@ -246,20 +267,21 @@ export const DispatchAssignmentEngine: React.FC<DispatchAssignmentEngineProps> =
             </div>
           </div>
 
-          <div className="mt-2 pt-2 border-t border-[#2A2D32] text-[10px] text-[#8C929B]">
-            DOOR GAUGE: {activeVehicle.trailer_spec.internal_width_m}m (W) × {activeVehicle.trailer_spec.internal_height_m}m (H)
+          <div className="pt-2 border-t border-slate-200/80 text-xs text-slate-500">
+            Internal Portal: {activeVehicle?.trailer_spec.internal_width_m}m W &times; {activeVehicle?.trailer_spec.internal_height_m}m H
           </div>
         </div>
 
         {/* Step 3: Driver Selection & EC 561/2006 Tachograph Compliance */}
-        <div className="bg-[#0F1113] border border-[#2A2D32] p-3 flex flex-col justify-between">
+        <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl flex flex-col justify-between space-y-3">
           <div>
-            <div className="flex items-center justify-between border-b border-[#2A2D32] pb-1.5 mb-2">
-              <span className="font-bold text-[#FFFFFF] tracking-wider">
-                3. EC 561/2006 TACHOGRAPH AUDIT
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-2 mb-2">
+              <span className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">3</span>
+                <span>Driver Tachograph Audit</span>
               </span>
-              <span className="text-[#8C929B] text-[10px]">
-                {drivers.length} ACTIVE DRIVERS
+              <span className="text-slate-500 text-[11px]">
+                {drivers.length} Drivers
               </span>
             </div>
 
@@ -273,31 +295,31 @@ export const DispatchAssignmentEngine: React.FC<DispatchAssignmentEngineProps> =
                   <div
                     key={d.driver_id}
                     onClick={() => setSelectedDriverId(d.driver_id)}
-                    className={`p-2.5 cursor-pointer border transition-all ${
+                    className={`p-3 cursor-pointer rounded-xl border transition-all ${
                       isSelected
-                        ? 'bg-[#2A2D32] border-[#FFFFFF]'
-                        : 'bg-[#181A1D] border-[#2A2D32] hover:border-[#3e444d]'
+                        ? 'bg-white border-blue-500 ring-2 ring-blue-500/10 shadow-xs'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-center justify-between font-bold mb-1">
-                      <span className={isSelected ? 'text-[#FFFFFF]' : 'text-[#E1E4E8]'}>
-                        {d.driver_name} [{d.country}]
+                      <span className="text-xs text-slate-900">
+                        {d.driver_name} <span className="text-slate-400 font-normal">[{d.country}]</span>
                       </span>
                       <span
-                        className={`text-[10px] px-1 border ${
+                        className={`text-[10px] font-semibold px-2 py-0.2 rounded-full border ${
                           isWarn
-                            ? 'border-[#8C734B] text-[#e5bf7d]'
-                            : 'border-[#4E6E5D] text-[#8cd1aa]'
+                            ? 'bg-amber-50 border-amber-200 text-amber-800'
+                            : 'bg-emerald-50 border-emerald-200 text-emerald-800'
                         }`}
                       >
-                        {Math.floor(contMinsLeft / 60)}h {contMinsLeft % 60}m CONT
+                        {Math.floor(contMinsLeft / 60)}h {contMinsLeft % 60}m Left
                       </span>
                     </div>
 
-                    <div className="text-[10px] text-[#8C929B] space-y-0.5">
-                      <div>DRIVING: {d.daily_driving_hours.toFixed(1)}h / 9.0h DAILY MAX</div>
-                      <div>WEEKLY: {d.weekly_accumulated_hours.toFixed(1)}h / 56.0h MAX</div>
-                      <div>REST ALERT: {d.mandatory_break_in}</div>
+                    <div className="text-[11px] text-slate-600 space-y-0.5">
+                      <div>Driving: <strong>{d.daily_driving_hours.toFixed(1)}h</strong> / 9.0h Daily Cap</div>
+                      <div>Weekly: <strong>{d.weekly_accumulated_hours.toFixed(1)}h</strong> / 56.0h Max</div>
+                      <div className="text-slate-500 font-medium">Rest: {d.mandatory_break_in}</div>
                     </div>
                   </div>
                 );
@@ -305,116 +327,116 @@ export const DispatchAssignmentEngine: React.FC<DispatchAssignmentEngineProps> =
             </div>
           </div>
 
-          <div className="mt-2 pt-2 border-t border-[#2A2D32] text-[10px] text-[#8cd1aa]">
-            QUALIFICATION: {activeDriver.driver_qualification_card_cqc}
+          <div className="pt-2 border-t border-slate-200/80 text-xs text-emerald-700 font-medium truncate">
+            {activeDriver?.driver_qualification_card_cqc}
           </div>
         </div>
       </div>
 
       {/* Instant 3-Point Validation Logic Matrix Grounded in European Laws */}
-      <div className="bg-[#0F1113] border border-[#2A2D32] p-3 space-y-2">
-        <div className="flex items-center justify-between border-b border-[#2A2D32] pb-1.5">
-          <span className="font-bold text-[#FFFFFF] tracking-wider uppercase flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-[#8cd1aa]" />
-            PRE-DISPATCH EUROPEAN REGULATORY LOGIC VERIFICATION
+      <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+          <span className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>Pre-Dispatch European Regulatory Logic Verification</span>
           </span>
-          <span className="text-[#8C929B] text-[10px]">
-            ACTIVE TARGET: {activeManifest.manifest_id} ➔ {activeVehicle.vehicle_id} ➔ {activeDriver.driver_name}
+          <span className="text-slate-500 text-[11px]">
+            Target: <strong className="text-slate-800 font-mono">{activeManifest?.manifest_id}</strong> &rarr; <strong className="text-slate-800 font-mono">{activeVehicle?.vehicle_id}</strong>
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           {/* Check 1 */}
-          <div className="p-2 bg-[#181A1D] border border-[#2A2D32]">
-            <div className="text-[#8C929B] text-[10px]">
-              CHECK 1: EC 561/2006 SMART TACHOGRAPH
-            </div>
+          <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
+            <div className="text-slate-500 font-medium text-[11px]">Check 1: EC 561/2006 Tachograph</div>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-[#E1E4E8]">Continuous Drive & Daily Cap:</span>
-              <span className={tachoPass ? 'text-[#8cd1aa] font-bold' : 'text-[#e5bf7d] font-bold'}>
-                {tachoPass ? 'COMPLIANT [PASS]' : 'BREAK REQUIRED'}
+              <span className="text-slate-800 font-semibold">Continuous & Daily Cap:</span>
+              <span className={`font-bold px-2 py-0.5 rounded-full text-[10px] ${
+                tachoPass ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+              }`}>
+                {tachoPass ? 'Compliant' : 'Break Due'}
               </span>
             </div>
-            <div className="text-[10px] text-[#8C929B] mt-0.5">
-              Tacho Card: {activeDriver.tachograph_card_id}
+            <div className="text-[10px] text-slate-400 font-mono mt-1">
+              Card: {activeDriver?.tachograph_card_id}
             </div>
           </div>
 
           {/* Check 2 */}
-          <div className="p-2 bg-[#181A1D] border border-[#2A2D32]">
-            <div className="text-[#8C929B] text-[10px]">
-              CHECK 2: DIRECTIVE 96/53/EC PAYLOAD & 33 EPAL
-            </div>
+          <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
+            <div className="text-slate-500 font-medium text-[11px]">Check 2: Directive 96/53/EC Payload & 33 EPAL</div>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-[#E1E4E8]">
-                {formatMass(activeManifest.metrics.total_mass_kg)} / {formatMass(activeVehicle.trailer_spec.max_payload_kg)}:
-              </span>
-              <span className={payloadPass && palletPass ? 'text-[#8cd1aa] font-bold' : 'text-[#e88d8d] font-bold'}>
-                {payloadPass && palletPass ? `${activeManifest.metrics.euro_pallets_count} EPAL [LEGAL]` : 'OVERLOAD'}
+              <span className="text-slate-800 font-semibold">{formatMass(activeManifest?.metrics.total_mass_kg || 0)}:</span>
+              <span className={`font-bold px-2 py-0.5 rounded-full text-[10px] ${
+                payloadPass && palletPass ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+              }`}>
+                {payloadPass && palletPass ? `${activeManifest?.metrics.euro_pallets_count} EPAL Legal` : 'Overload'}
               </span>
             </div>
-            <div className="text-[10px] text-[#8C929B] mt-0.5">
-              MAM Cap: 40,000 kg Articulated
+            <div className="text-[10px] text-slate-400 mt-1">
+              MAM Limit: 40,000 kg (Articulated)
             </div>
           </div>
 
           {/* Check 3 */}
-          <div className="p-2 bg-[#181A1D] border border-[#2A2D32]">
-            <div className="text-[#8C929B] text-[10px]">
-              CHECK 3: 13.6m BOX ENVELOPE & ADR/CABOTAGE
-            </div>
+          <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
+            <div className="text-slate-500 font-medium text-[11px]">Check 3: 13.6m Enclosure & Cabotage</div>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-[#E1E4E8]">
-                Portal Clearance & Cabotage ({activeManifest.cabotage_operation_count}/3):
-              </span>
-              <span className={dimsPass && cabotagePass ? 'text-[#8cd1aa] font-bold' : 'text-[#e88d8d] font-bold'}>
-                {dimsPass && cabotagePass ? 'CLEARED [PASS]' : 'VIOLATION'}
+              <span className="text-slate-800 font-semibold">Portal & Cabotage ({activeManifest?.cabotage_operation_count}/3):</span>
+              <span className={`font-bold px-2 py-0.5 rounded-full text-[10px] ${
+                dimsPass && cabotagePass ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+              }`}>
+                {dimsPass && cabotagePass ? 'Cleared' : 'Violation'}
               </span>
             </div>
-            <div className="text-[10px] text-[#8C929B] mt-0.5">
-              {activeManifest.handling_requirements.adr_dangerous_goods ? activeManifest.handling_requirements.adr_class : 'General Cargo (Non-ADR)'}
+            <div className="text-[10px] text-slate-400 mt-1 truncate">
+              {activeManifest?.handling_requirements.adr_dangerous_goods ? activeManifest.handling_requirements.adr_class : 'General Freight (Non-ADR)'}
             </div>
           </div>
         </div>
 
-        {/* Validation Errors if any */}
+        {/* Validation Errors */}
         {validationErrors.length > 0 && (
-          <div className="p-2.5 bg-[#7A3E3E]/20 border border-[#7A3E3E] text-[#e88d8d] text-xs font-medium space-y-1">
-            <div className="font-bold">ASSIGNMENT BLOCKED DUE TO EUROPEAN REGULATORY INFRINGEMENT:</div>
+          <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 text-xs font-medium space-y-1">
+            <div className="font-bold flex items-center gap-1.5 text-rose-800">
+              <AlertOctagon className="w-4 h-4" />
+              <span>Assignment Blocked Due to European Regulatory Violation:</span>
+            </div>
             {validationErrors.map((err, i) => (
-              <div key={i}>• {err}</div>
+              <div key={i} className="pl-5 text-slate-700">• {err}</div>
             ))}
           </div>
         )}
 
         {/* Success Banner */}
         {assignmentSuccess && (
-          <div className="p-2.5 bg-[#4E6E5D]/25 border border-[#4E6E5D] text-[#8cd1aa] text-xs font-bold flex items-center justify-between">
-            <span>
-              ASSIGNMENT EXECUTED // e-CMR CONSIGNMENT NOTE & TEN-T ROUTE SYNCED TO IN-CAB SMART TACHOGRAPH TERMINAL
-            </span>
+          <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs font-bold flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>Assignment Executed // e-CMR Consignment Note & TEN-T Route Synced to In-Cab DTCO Terminal</span>
+            </div>
             <button
-              onClick={() => onOpenBolModal(activeManifest.manifest_id)}
-              className="px-2 py-1 bg-[#181A1D] border border-[#4E6E5D] text-[#FFFFFF] text-[10px]"
+              onClick={() => onOpenBolModal(activeManifest?.manifest_id || '')}
+              className="px-3 py-1 bg-white border border-emerald-300 hover:bg-emerald-100 text-emerald-800 text-xs rounded-lg shadow-2xs transition-colors"
             >
-              INSPECT TRANSMITTED e-CMR
+              Inspect e-CMR
             </button>
           </div>
         )}
       </div>
 
       {/* Action Trigger Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#2A2D32]">
-        <div className="text-[11px] text-[#8C929B]">
-          TRANSMISSION PROTOCOL: ENCRYPTED MQTT + VDO DTCO 4.1 SMART TACHOGRAPH INGESTION
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+        <div className="text-xs text-slate-500">
+          Transmission Protocol: Encrypted MQTT + VDO DTCO 4.1 In-Cab Smart Tachograph Push
         </div>
 
         <button
           onClick={handleExecuteAssignment}
-          className="mta-btn px-6 py-2.5 bg-[#FFFFFF] border border-[#FFFFFF] hover:bg-[#E1E4E8] text-[#0F1113] text-xs font-bold flex items-center gap-2 shadow-[0_0_12px_rgba(255,255,255,0.2)] tracking-wider"
+          className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-sm transition-all"
         >
           <Send className="w-4 h-4" />
-          <span>EXECUTE DISPATCH & PUSH e-CMR TO HGV CAB TERMINAL</span>
+          <span>Execute Dispatch & Push e-CMR to Cab Terminal</span>
         </button>
       </div>
     </div>

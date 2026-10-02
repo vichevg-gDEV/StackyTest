@@ -33,22 +33,22 @@ export function getStatusColor(status: string): { bg: string; text: string; bord
     case 'NOMINAL':
     case 'BALANCED':
     case 'IN_TRANSIT':
-      return { bg: 'bg-[#4E6E5D]/20', text: 'text-[#8cd1aa]', border: 'border-[#4E6E5D]' };
+      return { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' };
     case 'WARNING':
     case 'IN-TRANS':
     case 'BREAK_DUE':
     case 'STEER_HEAVY':
     case 'OVER_DRIVE':
-      return { bg: 'bg-[#8C734B]/20', text: 'text-[#e5bf7d]', border: 'border-[#8C734B]' };
+      return { bg: 'bg-amber-50', text: 'text-amber-800', border: 'border-amber-200' };
     case 'INFRINGING':
     case 'TRI_AXLE_OVERLOAD':
     case 'CRITICAL':
     case 'DAILY_LIMIT_WARN':
-      return { bg: 'bg-[#7A3E3E]/20', text: 'text-[#e88d8d]', border: 'border-[#7A3E3E]' };
+      return { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' };
     case 'IDLE':
     case 'LOADING':
     case 'TACHO_REST':
     default:
-      return { bg: 'bg-[#2A2D32]/40', text: 'text-[#8C929B]', border: 'border-[#2A2D32]' };
+      return { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200' };
   }
 }

@@ -16,7 +16,9 @@ import {
   AlertTriangle,
   Compass,
   Navigation,
-  ShieldCheck
+  ShieldCheck,
+  Layers,
+  MapPin
 } from 'lucide-react';
 import { formatMass, formatSpeed, formatCurrencyEur } from '../utils/formatters';
 
@@ -61,17 +63,17 @@ const MapOverlays: React.FC<{
         const poly = polylinesRef.current[v.vehicle_id];
         poly.setPath(path);
         poly.setOptions({
-          strokeColor: isSelected ? '#FFFFFF' : '#8C929B',
-          strokeOpacity: isSelected ? 0.95 : 0.45,
-          strokeWeight: isSelected ? 3 : 1.5,
+          strokeColor: isSelected ? '#2563EB' : '#94A3B8',
+          strokeOpacity: isSelected ? 0.95 : 0.6,
+          strokeWeight: isSelected ? 4 : 2,
           zIndex: isSelected ? 100 : 10,
         });
       } else {
         const poly = new mapsLib.Polyline({
           path,
-          strokeColor: isSelected ? '#FFFFFF' : '#8C929B',
-          strokeOpacity: isSelected ? 0.95 : 0.45,
-          strokeWeight: isSelected ? 3 : 1.5,
+          strokeColor: isSelected ? '#2563EB' : '#94A3B8',
+          strokeOpacity: isSelected ? 0.95 : 0.6,
+          strokeWeight: isSelected ? 4 : 2,
           map,
           zIndex: isSelected ? 100 : 10,
         });
@@ -99,11 +101,11 @@ const MapOverlays: React.FC<{
 
     // Brenner Pass Alpine Snow & Sectoral Driving Restriction Zone
     const brennerCircle = new mapsLib.Circle({
-      strokeColor: '#8C734B',
+      strokeColor: '#D97706',
       strokeOpacity: 0.8,
       strokeWeight: 1.5,
-      fillColor: '#8C734B',
-      fillOpacity: 0.25,
+      fillColor: '#F59E0B',
+      fillOpacity: 0.2,
       map,
       center: { lat: 47.0050, lng: 11.5050 },
       radius: 40000,
@@ -112,11 +114,11 @@ const MapOverlays: React.FC<{
 
     // Paris Île-de-France Crit'Air Low Emission Zone
     const critAirCircle = new mapsLib.Circle({
-      strokeColor: '#4E6E5D',
+      strokeColor: '#059669',
       strokeOpacity: 0.7,
       strokeWeight: 1.5,
-      fillColor: '#4E6E5D',
-      fillOpacity: 0.2,
+      fillColor: '#10B981',
+      fillOpacity: 0.15,
       map,
       center: { lat: 48.8566, lng: 2.3522 },
       radius: 35000,
@@ -125,11 +127,11 @@ const MapOverlays: React.FC<{
 
     // Gotthard Tunnel Safety Metering Zone
     const gotthardCircle = new mapsLib.Circle({
-      strokeColor: '#7A3E3E',
+      strokeColor: '#DC2626',
       strokeOpacity: 0.8,
       strokeWeight: 1.5,
-      fillColor: '#7A3E3E',
-      fillOpacity: 0.25,
+      fillColor: '#EF4444',
+      fillOpacity: 0.2,
       map,
       center: { lat: 46.5986, lng: 8.5947 },
       radius: 28000,
@@ -242,33 +244,30 @@ export const GlobalVectorMap: React.FC<GlobalVectorMapProps> = ({
   );
 
   return (
-    <div className={`relative w-full ${heightClass} bg-[#0F1113] border border-[#2A2D32] flex flex-col overflow-hidden font-tabular select-none`}>
+    <div className={`relative w-full ${heightClass} bg-slate-100 rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden select-none`}>
       {/* Top Map HUD Bar */}
-      <div className="z-20 bg-[#181A1D] border-b border-[#2A2D32] px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div className="z-20 bg-white/95 backdrop-blur-xs border-b border-slate-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2">
-          <Crosshair className="w-3.5 h-3.5 text-[#FFFFFF]" />
-          <span className="font-bold text-[#FFFFFF] tracking-wider uppercase">
-            TEN-T CORRIDOR MAP // EUROPEAN SPATIAL TELEMETRY
+          <div className="w-2.5 h-2.5 rounded-full bg-blue-600" />
+          <span className="font-bold text-slate-900 tracking-tight">
+            TEN-T European Freight Corridors
           </span>
-          <span className="text-[#8C929B] border-l border-[#2A2D32] pl-2 hidden sm:inline">
-            SYSTEM: <span className="text-[#E1E4E8]">GOOGLE MAPS (DARK MERCATOR)</span>
-          </span>
-          <span className="text-[#8C929B] border-l border-[#2A2D32] pl-2">
-            FLEET: <span className="text-[#FFFFFF] font-bold">{vehicles.length} HGVs</span>
+          <span className="text-slate-400 border-l border-slate-200 pl-2">
+            Fleet: <strong className="text-slate-700">{vehicles.length} HGVs</strong>
           </span>
         </div>
 
         {/* European Corridor Sector Presets */}
-        <div className="flex items-center gap-1">
-          <span className="text-[#8C929B] text-[10px]">CORRIDOR:</span>
+        <div className="flex items-center gap-1 overflow-x-auto">
+          <span className="text-slate-400 text-[11px] font-medium mr-1">Corridor:</span>
           {['EUROPE', 'RHINE-ALPINE', 'BENELUX-BALTIC', 'MEDITERRANEAN', 'SCANDINAVIA', 'CENTRAL-EAST'].map((sec) => (
             <button
               key={sec}
               onClick={() => setActiveSector(sec)}
-              className={`mta-btn px-2 py-0.5 text-[10px] border ${
+              className={`px-2.5 py-1 text-[11px] font-medium rounded-lg border transition-all ${
                 activeSector === sec
-                  ? 'bg-[#2A2D32] border-[#FFFFFF] text-[#FFFFFF]'
-                  : 'bg-[#181A1D] border-[#2A2D32] text-[#8C929B] hover:text-[#E1E4E8]'
+                  ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-2xs font-semibold'
+                  : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               {sec}
@@ -277,35 +276,35 @@ export const GlobalVectorMap: React.FC<GlobalVectorMapProps> = ({
         </div>
 
         {/* Layer Toggles */}
-        <div className="flex items-center gap-3 text-[11px] border-l border-[#2A2D32] pl-3">
-          <label className="flex items-center gap-1.5 cursor-pointer text-[#8C929B] hover:text-[#E1E4E8]">
+        <div className="flex items-center gap-3 text-xs border-l border-slate-200 pl-3">
+          <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900">
             <input
               type="checkbox"
               checked={layers.trucks}
               onChange={(e) => setLayers({ ...layers, trucks: e.target.checked })}
-              className="accent-[#FFFFFF] w-3 h-3 rounded-none"
+              className="accent-blue-600 w-3.5 h-3.5 rounded-sm"
             />
-            <span className={layers.trucks ? 'text-[#E1E4E8]' : 'text-[#8C929B]'}>HGVs ({vehicles.length})</span>
+            <span>HGVs ({vehicles.length})</span>
           </label>
 
-          <label className="flex items-center gap-1.5 cursor-pointer text-[#8C929B] hover:text-[#E1E4E8]">
+          <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900">
             <input
               type="checkbox"
               checked={layers.routes}
               onChange={(e) => setLayers({ ...layers, routes: e.target.checked })}
-              className="accent-[#FFFFFF] w-3 h-3 rounded-none"
+              className="accent-blue-600 w-3.5 h-3.5 rounded-sm"
             />
-            <span className={layers.routes ? 'text-[#E1E4E8]' : 'text-[#8C929B]'}>TEN-T Routes</span>
+            <span>TEN-T Routes</span>
           </label>
 
-          <label className="flex items-center gap-1.5 cursor-pointer text-[#8C929B] hover:text-[#E1E4E8]">
+          <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900">
             <input
               type="checkbox"
               checked={layers.hazards}
               onChange={(e) => setLayers({ ...layers, hazards: e.target.checked })}
-              className="accent-[#FFFFFF] w-3 h-3 rounded-none"
+              className="accent-amber-600 w-3.5 h-3.5 rounded-sm"
             />
-            <span className={layers.hazards ? 'text-[#e5bf7d]' : 'text-[#8C929B]'}>Alps & LEZ</span>
+            <span>Alps & LEZ Zones</span>
           </label>
         </div>
       </div>
@@ -320,7 +319,7 @@ export const GlobalVectorMap: React.FC<GlobalVectorMapProps> = ({
             mapId="DEMO_MAP_ID"
             disableDefaultUI={true}
             gestureHandling="greedy"
-            colorScheme="DARK"
+            colorScheme="LIGHT"
             internalUsageAttributionIds={['gmp_mcp_codeassist_v1_aistudio']}
           >
             {/* Map Camera Controller */}
@@ -332,7 +331,7 @@ export const GlobalVectorMap: React.FC<GlobalVectorMapProps> = ({
               focusVehicle={focusVehicle}
             />
 
-            {/* Polylines & Weather/Clearance Hazards */}
+            {/* Polylines & Hazards */}
             <MapOverlays
               vehicles={vehicles}
               selectedVehicleId={selectedVehicleId}
@@ -340,7 +339,7 @@ export const GlobalVectorMap: React.FC<GlobalVectorMapProps> = ({
               showHazards={layers.hazards}
             />
 
-            {/* Advanced Markers for All 14 European Fleet Trucks */}
+            {/* Markers for All 14 European Fleet Trucks */}
             {layers.trucks &&
               vehicles.map((v) => {
                 const isSelected = v.vehicle_id === selectedVehicleId;
@@ -355,29 +354,29 @@ export const GlobalVectorMap: React.FC<GlobalVectorMapProps> = ({
                     }}
                     zIndex={isSelected ? 1000 : 100}
                   >
-                    {/* Custom Sharp MTA Truck Badge */}
+                    {/* Modern Clean Truck Pin Badge */}
                     <div
-                      className={`relative px-2 py-1 flex items-center gap-1.5 cursor-pointer transition-all ${
+                      className={`relative px-2.5 py-1.5 flex items-center gap-1.5 cursor-pointer rounded-lg shadow-md border transition-all ${
                         isSelected
-                          ? 'bg-[#FFFFFF] text-[#0F1113] border-2 border-[#FFFFFF] shadow-[0_0_16px_rgba(255,255,255,0.8)] scale-105'
-                          : 'bg-[#181A1D] text-[#E1E4E8] border border-[#2A2D32] hover:border-[#FFFFFF] shadow-lg'
+                          ? 'bg-blue-600 text-white border-blue-700 ring-4 ring-blue-500/20 scale-105 shadow-lg'
+                          : 'bg-white text-slate-800 border-slate-200 hover:border-blue-400 hover:shadow-lg'
                       }`}
-                      style={{ borderRadius: '0px' }}
                     >
-                      {/* Pulse pip */}
                       <span
-                        className="inline-block w-2 h-2 shrink-0"
-                        style={{
-                          backgroundColor: v.status === 'ON-ROUTE' ? (isSelected ? '#0F1113' : '#4E6E5D') : '#8C734B',
-                          borderRadius: '0px',
-                        }}
+                        className={`w-2 h-2 rounded-full ${
+                          v.status === 'ON-ROUTE'
+                            ? (isSelected ? 'bg-white' : 'bg-emerald-500')
+                            : 'bg-amber-500'
+                        }`}
                       />
 
-                      <span className="font-bold text-[10px] tracking-wider whitespace-nowrap">
+                      <span className="font-bold text-xs font-mono tracking-tight">
                         {v.vehicle_id}
                       </span>
 
-                      <span className="text-[9px] opacity-80 whitespace-nowrap">
+                      <span className={`text-[10px] px-1 py-0.2 rounded font-semibold ${
+                        isSelected ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600'
+                      }`}>
                         {Math.round(v.metrics.speed_kmh)}k
                       </span>
                     </div>
@@ -388,122 +387,122 @@ export const GlobalVectorMap: React.FC<GlobalVectorMapProps> = ({
         </APIProvider>
 
         {/* Tactical Coordinates HUD Overlay */}
-        <div className="absolute top-2 left-2 z-10 pointer-events-none text-[10px] text-[#8C929B] bg-[#181A1D]/85 border border-[#2A2D32] p-2 space-y-0.5">
-          <div>JURISDICTION: EUROPEAN UNION // DIRECTIVE 96/53/EC</div>
+        <div className="absolute top-3 left-3 z-10 pointer-events-none text-[11px] text-slate-600 bg-white/90 backdrop-blur-xs border border-slate-200 rounded-lg p-2.5 shadow-xs space-y-0.5">
+          <div className="font-semibold text-slate-800">EU JURISDICTION: DIRECTIVE 96/53/EC</div>
           <div>HOURS OF SERVICE: EC REGULATION 561/2006 (GEN 2 SMART TACHO)</div>
-          <div>TELEMETRY: 14 HGVs TEN-T WAYPOINT NAVIGATION @ 10Hz</div>
+          <div>SPEED LIMITER: 90 km/h MANDATED CAP</div>
         </div>
 
         {/* Tactical Zoom Toolbar */}
-        <div className="absolute right-3 bottom-3 z-10 flex flex-col gap-1 bg-[#181A1D] border border-[#2A2D32] p-1">
+        <div className="absolute right-3 bottom-3 z-10 flex flex-col gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-md">
           <button
             onClick={() => setZoomInCount((c) => c + 1)}
-            className="mta-btn p-1.5 text-[#8C929B] hover:text-[#FFFFFF] hover:bg-[#2A2D32]"
+            className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
             title="Zoom In"
           >
             <ZoomIn className="w-4 h-4" />
           </button>
           <button
             onClick={() => setZoomOutCount((c) => c + 1)}
-            className="mta-btn p-1.5 text-[#8C929B] hover:text-[#FFFFFF] hover:bg-[#2A2D32]"
+            className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
             title="Zoom Out"
           >
             <ZoomOut className="w-4 h-4" />
           </button>
           <button
             onClick={() => setResetCount((c) => c + 1)}
-            className="mta-btn p-1.5 text-[#8C929B] hover:text-[#FFFFFF] hover:bg-[#2A2D32]"
+            className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
             title="Reset View"
           >
             <Maximize2 className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Selected Truck Real-Time Inspector Drawer */}
+        {/* Selected Truck Inspector Drawer */}
         {selectedVehicle && (
-          <div className="absolute top-3 right-3 z-10 w-84 bg-[#181A1D] border-2 border-[#FFFFFF] p-3 text-xs shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#2A2D32] pb-2 mb-2">
+          <div className="absolute top-3 right-3 z-10 w-88 bg-white border border-slate-200 rounded-2xl p-4 text-xs shadow-xl animate-in fade-in">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2.5">
               <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 bg-[#FFFFFF]" />
-                <span className="text-[#FFFFFF] font-bold tracking-wider">
-                  {selectedVehicle.vehicle_id} // {selectedVehicle.plate_number}
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
+                <span className="text-slate-900 font-bold text-sm tracking-tight">
+                  {selectedVehicle.vehicle_id}
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold border border-slate-200">
+                  {selectedVehicle.plate_number}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setFocusVehicle(selectedVehicle)}
-                  className="px-2 py-0.5 text-[10px] bg-[#2A2D32] border border-[#8C929B] text-[#FFFFFF]"
-                  title="Center Map"
+                  className="px-2 py-1 text-[11px] font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                  title="Center Map on Vehicle"
                 >
-                  CENTER
+                  Center
                 </button>
                 <button
                   onClick={() => onSelectVehicle('')}
-                  className="text-[#8C929B] hover:text-[#FFFFFF]"
+                  className="w-6 h-6 text-slate-400 hover:text-slate-700 flex items-center justify-center rounded-lg hover:bg-slate-100"
                 >
                   ✕
                 </button>
               </div>
             </div>
 
-            <div className="space-y-1.5 text-[11px]">
+            <div className="space-y-2 text-xs">
               {/* Task Title */}
-              <div className="p-1.5 bg-[#0F1113] border border-[#2A2D32]">
-                <div className="text-[10px] text-[#8C929B] font-bold">CURRENT ACTIVE TEN-T TASK:</div>
-                <div className="text-[#FFFFFF] font-medium truncate">{selectedVehicle.current_task}</div>
-                <div className="text-[10px] text-[#8cd1aa] mt-0.5">
-                  PHASE: {selectedVehicle.task_phase} ({selectedVehicle.route_progress_pct}% COMPLETED)
+              <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+                <div className="text-[10px] text-slate-400 font-bold uppercase">Current TEN-T Task:</div>
+                <div className="text-slate-800 font-semibold truncate mt-0.5">{selectedVehicle.current_task}</div>
+                <div className="text-[11px] text-emerald-700 font-medium mt-1 flex items-center gap-1">
+                  <span>Phase: {selectedVehicle.task_phase}</span>
+                  <span>·</span>
+                  <span>{selectedVehicle.route_progress_pct}% Completed</span>
                 </div>
               </div>
 
-              <div className="flex justify-between py-0.5 border-b border-[#2A2D32]/50">
-                <span className="text-[#8C929B]">DRIVER / TRACTOR:</span>
-                <span className="text-[#E1E4E8] font-medium">{selectedVehicle.driver_name} · {selectedVehicle.make_model}</span>
+              <div className="flex justify-between py-1 border-b border-slate-100">
+                <span className="text-slate-500">Driver & Model:</span>
+                <span className="text-slate-800 font-medium">{selectedVehicle.driver_name} · {selectedVehicle.make_model}</span>
               </div>
 
-              <div className="flex justify-between py-0.5 border-b border-[#2A2D32]/50">
-                <span className="text-[#8C929B]">LOCATION (EU):</span>
-                <span className="text-[#E1E4E8]">
-                  {selectedVehicle.location.latitude.toFixed(4)}°N, {selectedVehicle.location.longitude.toFixed(4)}°E ({selectedVehicle.location.city}, {selectedVehicle.location.country})
+              <div className="flex justify-between py-1 border-b border-slate-100">
+                <span className="text-slate-500">Location:</span>
+                <span className="text-slate-800 font-medium">
+                  {selectedVehicle.location.city}, {selectedVehicle.location.country}
                 </span>
               </div>
 
-              <div className="flex justify-between py-0.5 border-b border-[#2A2D32]/50">
-                <span className="text-[#8C929B]">SPEED / EMISSIONS:</span>
-                <span className="text-[#FFFFFF] font-bold">
+              <div className="flex justify-between py-1 border-b border-slate-100">
+                <span className="text-slate-500">Speed & Standard:</span>
+                <span className="text-slate-900 font-bold">
                   {formatSpeed(selectedVehicle.metrics.speed_kmh)} · {selectedVehicle.emission_standard}
                 </span>
               </div>
 
-              <div className="flex justify-between py-0.5 border-b border-[#2A2D32]/50">
-                <span className="text-[#8C929B]">PAYLOAD MASS (DIRECTIVE 96/53):</span>
-                <span className="text-[#FFFFFF] font-bold">
-                  {formatMass(selectedVehicle.metrics.current_gross_mass_kg)} / {formatMass(selectedVehicle.trailer_spec.max_payload_kg)}
+              <div className="flex justify-between py-1 border-b border-slate-100">
+                <span className="text-slate-500">Euro-Pallets (EPAL 1):</span>
+                <span className="text-blue-700 font-bold">
+                  {selectedVehicle.metrics.euro_pallets_loaded} / {selectedVehicle.trailer_spec.max_euro_pallets} EPAL Loaded
                 </span>
               </div>
 
-              <div className="flex justify-between py-0.5 border-b border-[#2A2D32]/50">
-                <span className="text-[#8C929B]">EURO-PALLETS (EPAL 1):</span>
-                <span className="text-[#E1E4E8] font-bold">
-                  {selectedVehicle.metrics.euro_pallets_loaded} / {selectedVehicle.trailer_spec.max_euro_pallets} EPAL LOADED
+              <div className="flex justify-between py-1 border-b border-slate-100">
+                <span className="text-slate-500">Tire Pressure / AdBlue:</span>
+                <span className="text-slate-800 font-mono">
+                  {selectedVehicle.metrics.tire_pressure_bar[0]} bar · AdBlue {selectedVehicle.metrics.adblue_level_pct}%
                 </span>
               </div>
 
-              <div className="flex justify-between py-0.5 border-b border-[#2A2D32]/50">
-                <span className="text-[#8C929B]">TIRE PRESSURES / ADBLUE:</span>
-                <span className="text-[#E1E4E8]">
-                  {selectedVehicle.metrics.tire_pressure_bar.join('/')} bar · AdBlue {selectedVehicle.metrics.adblue_level_pct}%
+              <div className="flex justify-between py-1 border-b border-slate-100">
+                <span className="text-slate-500">Corridor Route:</span>
+                <span className="text-slate-800 font-medium truncate max-w-[160px]">
+                  {selectedVehicle.active_route.route_name}
                 </span>
               </div>
 
-              <div className="flex justify-between py-0.5 border-b border-[#2A2D32]/50">
-                <span className="text-[#8C929B]">TEN-T ROUTE & TOLLS:</span>
-                <span className="text-[#E1E4E8] truncate max-w-[160px]">{selectedVehicle.active_route.route_name} ({formatCurrencyEur(selectedVehicle.active_route.toll_cost_eur)})</span>
-              </div>
-
-              <div className="flex justify-between py-0.5">
-                <span className="text-[#8C929B]">DESTINATION ETA:</span>
-                <span className="text-[#8cd1aa] font-bold">
+              <div className="flex justify-between py-1">
+                <span className="text-slate-500">Destination ETA:</span>
+                <span className="text-emerald-700 font-bold">
                   {selectedVehicle.active_route.destination_name} ({selectedVehicle.active_route.est_time_remaining})
                 </span>
               </div>

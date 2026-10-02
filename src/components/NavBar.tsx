@@ -15,51 +15,45 @@ export const NavBar: React.FC<NavBarProps> = ({
   pendingManifestsCount,
   alertsCount,
 }) => {
-  const navItems: { id: ActiveNavTab; label: string; icon: React.ReactNode; indexNumber: string; badge?: number }[] = [
+  const navItems: { id: ActiveNavTab; label: string; icon: React.ReactNode; badge?: number }[] = [
     {
       id: 'CONSOLE',
-      label: 'PRIMARY CONSOLE',
-      indexNumber: '[0]',
-      icon: <LayoutDashboard className="w-3.5 h-3.5" />,
+      label: 'Primary Console',
+      icon: <LayoutDashboard className="w-4 h-4" />,
     },
     {
       id: 'GLOBAL_MAP',
-      label: 'GLOBAL MAP ENGINE',
-      indexNumber: '[1]',
-      icon: <Map className="w-3.5 h-3.5" />,
+      label: 'TEN-T Map Engine',
+      icon: <Map className="w-4 h-4" />,
     },
     {
       id: 'FLEET_ROUTING',
-      label: 'FLEET ROUTING',
-      indexNumber: '[2]',
-      icon: <Navigation className="w-3.5 h-3.5" />,
+      label: 'Fleet Routing & Detours',
+      icon: <Navigation className="w-4 h-4" />,
     },
     {
       id: 'DISPATCH_BOARD',
-      label: 'DISPATCH & LOAD',
-      indexNumber: '[3]',
-      icon: <ClipboardList className="w-3.5 h-3.5" />,
+      label: 'Dispatch & Staging',
+      icon: <ClipboardList className="w-4 h-4" />,
       badge: pendingManifestsCount,
     },
     {
       id: 'CAPACITY_MATRIX',
-      label: 'CAPACITY MATRIX',
-      indexNumber: '[4]',
-      icon: <Scale className="w-3.5 h-3.5" />,
+      label: 'Capacity & Payload Matrix',
+      icon: <Scale className="w-4 h-4" />,
     },
     {
       id: 'REPORTS',
-      label: 'AUDIT & COMPLIANCE',
-      indexNumber: '[5]',
-      icon: <FileText className="w-3.5 h-3.5" />,
+      label: 'Audit & Compliance',
+      icon: <FileText className="w-4 h-4" />,
       badge: alertsCount > 0 ? alertsCount : undefined,
     },
   ];
 
   return (
-    <nav className="w-full bg-[#181A1D] border-b border-[#2A2D32] px-4 py-1.5 flex items-center gap-1 overflow-x-auto text-xs font-tabular">
-      <span className="text-[#8C929B] font-semibold tracking-wider pr-2 select-none shrink-0">
-        NAV:
+    <nav className="w-full bg-white border-b border-slate-200 px-5 py-2 flex items-center gap-1.5 overflow-x-auto text-xs shadow-2xs">
+      <span className="text-slate-400 font-semibold tracking-wider pr-2 select-none shrink-0 uppercase text-[11px]">
+        Views:
       </span>
       {navItems.map((item) => {
         const isActive = activeTab === item.id;
@@ -67,17 +61,18 @@ export const NavBar: React.FC<NavBarProps> = ({
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
-            className={`mta-btn px-3 py-1.5 flex items-center gap-2 whitespace-nowrap border shrink-0 transition-all ${
+            className={`px-3.5 py-1.5 flex items-center gap-2 whitespace-nowrap rounded-lg text-xs font-medium transition-all ${
               isActive
-                ? 'bg-[#2A2D32] border-[#FFFFFF] text-[#FFFFFF] shadow-[0_0_8px_rgba(255,255,255,0.15)]'
-                : 'bg-[#181A1D] border-[#2A2D32] text-[#8C929B] hover:text-[#E1E4E8] hover:border-[#3e444d]'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            <span className={isActive ? 'text-[#FFFFFF]' : 'text-[#8C929B]'}>{item.indexNumber}</span>
             {item.icon}
-            <span className="font-medium tracking-wide">{item.label}</span>
+            <span>{item.label}</span>
             {item.badge !== undefined && item.badge > 0 && (
-              <span className="px-1.5 py-0.2 text-[10px] bg-[#7A3E3E] text-[#FFFFFF] font-mono">
+              <span className={`px-1.5 py-0.2 text-[10px] font-bold rounded-full ${
+                isActive ? 'bg-white text-blue-600' : 'bg-rose-500 text-white'
+              }`}>
                 {item.badge}
               </span>
             )}

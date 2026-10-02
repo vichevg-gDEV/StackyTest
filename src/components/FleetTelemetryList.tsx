@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Vehicle } from '../types';
-import { Truck, Search, Radio, ChevronRight, AlertCircle, ArrowUpRight } from 'lucide-react';
+import { Truck, Search, Radio, ChevronRight, AlertCircle, ArrowUpRight, Navigation } from 'lucide-react';
 import { getStatusColor, formatSpeed } from '../utils/formatters';
 
 interface FleetTelemetryListProps {
@@ -43,43 +43,48 @@ export const FleetTelemetryList: React.FC<FleetTelemetryListProps> = ({
   });
 
   return (
-    <div className="w-full bg-[#181A1D] border border-[#2A2D32] flex flex-col font-tabular h-full">
+    <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col font-sans h-full overflow-hidden">
       {/* Header */}
-      <div className="px-3 py-2 border-b border-[#2A2D32] flex items-center justify-between gap-2">
+      <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between gap-2 bg-slate-50/50">
         <div className="flex items-center gap-2">
-          <Truck className="w-3.5 h-3.5 text-[#E1E4E8]" />
-          <span className="font-semibold text-xs text-[#FFFFFF] tracking-wider uppercase">
-            SECTION B: EUROPEAN FLEET TELEMETRY & CONTROL
-          </span>
+          <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+            <Truck className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="font-bold text-xs text-slate-900 tracking-tight">
+              European Fleet Telemetry
+            </h3>
+            <span className="text-[10px] text-slate-500">Live TEN-T HGV Network</span>
+          </div>
         </div>
-        <span className="text-[11px] text-[#8C929B]">
-          [{vehicles.length} ACTIVE HGV NODES // TEN-T]
+        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+          {vehicles.length} Units
         </span>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-2 border-b border-[#2A2D32] space-y-2 bg-[#0F1113]/50">
+      <div className="p-3 border-b border-slate-200 space-y-2 bg-white">
         <div className="relative">
-          <Search className="w-3.5 h-3.5 text-[#8C929B] absolute left-2.5 top-2.5" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
-            placeholder="FILTER VEHICLE, PLATE, DRIVER, COUNTRY, ROUTE..."
+            placeholder="Filter ID, plate, driver, city, route..."
             value={filterQuery}
             onChange={(e) => setFilterQuery(e.target.value)}
-            className="w-full bg-[#181A1D] border border-[#2A2D32] pl-8 pr-2 py-1.5 text-xs text-[#E1E4E8] placeholder-[#8C929B] focus:border-[#FFFFFF] focus:outline-none rounded-none"
+            className="w-full bg-slate-50 border border-slate-200 pl-9 pr-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 rounded-lg focus:outline-none focus:bg-white focus:border-blue-500 transition-colors"
           />
         </div>
 
         {/* Status segmented filters */}
-        <div className="flex items-center gap-1 text-[10px]">
+        <div className="flex items-center gap-1.5 text-[11px] overflow-x-auto pb-0.5">
           {(['ALL', 'ON-ROUTE', 'IN-TRANS', 'IDLE'] as const).map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`mta-btn px-2 py-0.5 border ${
+              className={`px-2.5 py-1 rounded-lg font-medium border transition-all ${
                 statusFilter === st
-                  ? 'bg-[#2A2D32] border-[#FFFFFF] text-[#FFFFFF]'
-                  : 'bg-[#181A1D] border-[#2A2D32] text-[#8C929B] hover:text-[#E1E4E8]'
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-2xs font-semibold'
+                  : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               {st}
@@ -89,10 +94,10 @@ export const FleetTelemetryList: React.FC<FleetTelemetryListProps> = ({
       </div>
 
       {/* Active Truck List */}
-      <div className="flex-1 overflow-y-auto divide-y divide-[#2A2D32]">
+      <div className="flex-1 overflow-y-auto divide-y divide-slate-100 p-2 space-y-1.5">
         {filteredVehicles.length === 0 ? (
-          <div className="p-6 text-center text-xs text-[#8C929B]">
-            NO EUROPEAN FLEET NODES MATCH SPECIFIED TELEMETRY FILTER
+          <div className="p-6 text-center text-xs text-slate-500">
+            No European fleet units match specified telemetry filter
           </div>
         ) : (
           filteredVehicles.map((v) => {
@@ -103,77 +108,78 @@ export const FleetTelemetryList: React.FC<FleetTelemetryListProps> = ({
               <div
                 key={v.vehicle_id}
                 onClick={() => onSelectVehicle(v.vehicle_id)}
-                className={`p-2.5 cursor-pointer transition-all ${
+                className={`p-3 cursor-pointer rounded-xl transition-all border ${
                   isSelected
-                    ? 'bg-[#2A2D32] border-l-2 border-l-[#FFFFFF]'
-                    : 'hover:bg-[#2A2D32]/50'
+                    ? 'bg-blue-50/70 border-blue-300 ring-2 ring-blue-500/10 shadow-xs'
+                    : 'bg-white hover:bg-slate-50 border-slate-200/80 shadow-2xs'
                 }`}
               >
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-[#FFFFFF] tracking-wider">
-                      &gt; {v.vehicle_id}
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-900 font-mono tracking-tight text-sm">
+                      {v.vehicle_id}
                     </span>
-                    <span className="text-[10px] px-1 bg-[#0F1113] border border-[#2A2D32] text-[#8cd1aa] font-mono">
-                      {v.location.country}
+                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200">
+                      {v.plate_number}
                     </span>
-                    <span className="text-[#8C929B] text-[11px] font-sans">
-                      ({v.driver_name})
+                    <span className="text-slate-500 text-xs truncate max-w-[100px]">
+                      {v.driver_name}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <span
-                      className={`px-1.5 py-0.2 text-[10px] border ${statusTheme.border} ${statusTheme.bg} ${statusTheme.text}`}
+                      className={`px-2 py-0.5 text-[10px] font-semibold rounded-full border ${statusTheme.border} ${statusTheme.bg} ${statusTheme.text}`}
                     >
                       {v.status}
                     </span>
-                    <span className="font-semibold text-[#E1E4E8]">
+                    <span className="font-bold text-slate-800 text-xs font-mono">
                       {formatSpeed(v.metrics.speed_kmh)}
                     </span>
                   </div>
                 </div>
 
                 {/* Real Task & Phase Line */}
-                <div className="mt-1 text-[11px] text-[#FFFFFF] font-sans truncate" title={v.current_task}>
+                <div className="text-xs text-slate-800 font-medium truncate mb-1" title={v.current_task}>
                   • {v.current_task}
                 </div>
 
                 {/* Subtitle Telemetry Information */}
-                <div className="flex items-center justify-between text-[10px] text-[#8C929B] mt-0.5">
+                <div className="flex items-center justify-between text-[11px] text-slate-500">
                   <span className="truncate max-w-[170px]" title={v.active_route.route_name}>
                     {v.active_route.origin_id} → {v.active_route.destination_id}
                   </span>
-                  <span className="text-[#8cd1aa] font-semibold">
-                    {v.task_phase} · ETA: {v.active_route.est_time_remaining}
+                  <span className="text-emerald-700 font-semibold">
+                    {v.task_phase} · {v.active_route.est_time_remaining}
                   </span>
                 </div>
 
                 {/* Progress mass & AdBlue/Fuel indicators */}
-                <div className="mt-1.5 pt-1.5 border-t border-[#2A2D32]/60 grid grid-cols-2 gap-2 text-[10px] text-[#8C929B]">
+                <div className="mt-2 pt-2 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-slate-500">
                   <div>
-                    LOAD: <span className="text-[#E1E4E8]">{v.metrics.euro_pallets_loaded} EPAL</span> ({v.metrics.mass_load_index_pct.toFixed(0)}%)
+                    Payload: <strong className="text-slate-800">{v.metrics.euro_pallets_loaded} EPAL</strong> ({v.metrics.mass_load_index_pct.toFixed(0)}%)
                   </div>
                   <div className="text-right">
-                    DIESEL: <span className="text-[#E1E4E8]">{v.metrics.fuel_level_pct.toFixed(0)}%</span> · AdBlue <span className="text-[#8cd1aa]">{v.metrics.adblue_level_pct}%</span>
+                    Diesel: <strong className="text-slate-800">{v.metrics.fuel_level_pct.toFixed(0)}%</strong> · AdBlue: <strong className="text-blue-700">{v.metrics.adblue_level_pct}%</strong>
                   </div>
                 </div>
 
-                {/* Direct quick action buttons if selected */}
+                {/* Action buttons if selected */}
                 {isSelected && (
-                  <div className="mt-2 pt-2 border-t border-[#3e444d] flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="mt-2.5 pt-2.5 border-t border-blue-200/60 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => onOpenAssignModal && onOpenAssignModal(v.vehicle_id)}
-                      className="mta-btn flex-1 py-1 px-2 text-[10px] bg-[#181A1D] border border-[#2A2D32] hover:border-[#FFFFFF] text-[#FFFFFF] flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 px-2.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-1.5 shadow-2xs transition-all"
                     >
-                      <ArrowUpRight className="w-3 h-3" />
-                      ASSIGN e-CMR
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                      <span>Assign e-CMR</span>
                     </button>
                     <button
                       onClick={() => onOpenRerouteModal && onOpenRerouteModal(v.vehicle_id)}
-                      className="mta-btn flex-1 py-1 px-2 text-[10px] bg-[#181A1D] border border-[#2A2D32] hover:border-[#FFFFFF] text-[#8C929B] hover:text-[#FFFFFF] flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 px-2.5 text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg flex items-center justify-center gap-1.5 transition-colors"
                     >
-                      TEN-T RE-ROUTE
+                      <Navigation className="w-3.5 h-3.5" />
+                      <span>TEN-T Reroute</span>
                     </button>
                   </div>
                 )}

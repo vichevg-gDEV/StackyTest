@@ -1,6 +1,6 @@
 import React from 'react';
 import { SystemAlert } from '../types';
-import { AlertTriangle, AlertCircle, ShieldAlert, Check, Bell, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, AlertCircle, ShieldAlert, Check, Bell, ShieldCheck, Crosshair } from 'lucide-react';
 
 interface SystemAlertsBannerProps {
   alerts: SystemAlert[];
@@ -13,27 +13,38 @@ export const SystemAlertsBanner: React.FC<SystemAlertsBannerProps> = ({
   onAcknowledgeAlert,
   onSelectVehicle,
 }) => {
+  const unresolvedAlerts = alerts.filter((a) => !a.acknowledged);
+
   return (
-    <div className="w-full bg-[#181A1D] border border-[#2A2D32] flex flex-col font-tabular">
+    <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="px-3 py-1.5 border-b border-[#2A2D32] flex items-center justify-between text-xs">
+      <div className="px-4 py-2.5 border-b border-slate-200 flex items-center justify-between text-xs bg-slate-50/50">
         <div className="flex items-center gap-2">
-          <Bell className="w-3.5 h-3.5 text-[#e5bf7d]" />
-          <span className="font-semibold text-xs text-[#FFFFFF] tracking-wider uppercase">
-            SECTION E: EUROPEAN SYSTEM ALERTS & EC 561/2006 TACHOGRAPH MONITOR
-          </span>
+          <div className="w-6 h-6 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center">
+            <Bell className="w-3.5 h-3.5" />
+          </div>
+          <div>
+            <span className="font-bold text-xs text-slate-900 tracking-tight">
+              European Regulatory Alerts & Smart Tachograph Monitor
+            </span>
+            <span className="text-[10px] text-slate-400 ml-2">EC 561/2006 & Alpine Transit Restrictions</span>
+          </div>
         </div>
-        <span className="text-[11px] text-[#8C929B]">
-          [{alerts.filter((a) => !a.acknowledged).length} UNRESOLVED REGULATORY FLAGS]
+        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+          unresolvedAlerts.length > 0 
+            ? 'bg-amber-50 text-amber-800 border-amber-200' 
+            : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+        }`}>
+          {unresolvedAlerts.length} Unresolved Flags
         </span>
       </div>
 
       {/* Alerts Feed */}
-      <div className="p-2 space-y-1.5 max-h-36 overflow-y-auto divide-y divide-[#2A2D32]/40">
+      <div className="p-3 space-y-2 max-h-36 overflow-y-auto divide-y divide-slate-100">
         {alerts.length === 0 ? (
-          <div className="text-center py-2 text-xs text-[#8cd1aa] flex items-center justify-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-[#8cd1aa]" />
-            <span>ALL FLEET TELEMETRY & SMART TACHOGRAPH CYCLES COMPLIANT // ZERO ACTIVE INFRINGEMENTS</span>
+          <div className="text-center py-2.5 text-xs text-emerald-700 flex items-center justify-center gap-1.5 font-medium">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>All European fleet telemetry & driver tachograph cycles compliant // Zero active infringements</span>
           </div>
         ) : (
           alerts.map((alert) => {
@@ -43,34 +54,34 @@ export const SystemAlertsBanner: React.FC<SystemAlertsBannerProps> = ({
             return (
               <div
                 key={alert.id}
-                className={`pt-1.5 flex flex-wrap items-center justify-between gap-2 text-xs transition-colors ${
-                  alert.acknowledged ? 'opacity-60' : 'opacity-100'
+                className={`pt-2 flex flex-wrap items-center justify-between gap-3 text-xs transition-colors ${
+                  alert.acknowledged ? 'opacity-50' : 'opacity-100'
                 }`}
               >
-                <div className="flex items-start gap-2 flex-1 min-w-[280px]">
+                <div className="flex items-start gap-2.5 flex-1 min-w-[280px]">
                   <span
-                    className={`px-1 py-0.2 text-[10px] font-bold border shrink-0 ${
+                    className={`px-2 py-0.5 text-[10px] font-bold rounded-md border shrink-0 ${
                       isCritical
-                        ? 'bg-[#7A3E3E]/30 border-[#7A3E3E] text-[#e88d8d]'
+                        ? 'bg-rose-100 border-rose-200 text-rose-800'
                         : isWarn
-                        ? 'bg-[#8C734B]/30 border-[#8C734B] text-[#e5bf7d]'
-                        : 'bg-[#2A2D32] border-[#8C929B] text-[#E1E4E8]'
+                        ? 'bg-amber-100 border-amber-200 text-amber-800'
+                        : 'bg-blue-100 border-blue-200 text-blue-800'
                     }`}
                   >
-                    {isCritical ? '[!]' : isWarn ? '[!]' : '[*]'}
+                    {isCritical ? 'CRITICAL' : isWarn ? 'WARNING' : 'INFO'}
                   </span>
 
                   <div className="flex-1">
-                    <span className="text-[#8C929B] mr-2 text-[11px]">
+                    <span className="text-slate-400 font-mono mr-2 text-[11px]">
                       {alert.timestamp}
                     </span>
                     <span
-                      className={`cursor-pointer hover:underline ${
+                      className={`cursor-pointer hover:underline font-medium ${
                         isCritical
-                          ? 'text-[#e88d8d] font-bold'
+                          ? 'text-rose-700 font-bold'
                           : isWarn
-                          ? 'text-[#e5bf7d]'
-                          : 'text-[#E1E4E8]'
+                          ? 'text-slate-900 font-semibold'
+                          : 'text-slate-700'
                       }`}
                       onClick={() => alert.vehicle_id && onSelectVehicle && onSelectVehicle(alert.vehicle_id)}
                     >
@@ -79,21 +90,22 @@ export const SystemAlertsBanner: React.FC<SystemAlertsBannerProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-[11px]">
+                <div className="flex items-center gap-2 text-xs">
                   {alert.vehicle_id && (
                     <button
                       onClick={() => onSelectVehicle && onSelectVehicle(alert.vehicle_id!)}
-                      className="px-2 py-0.5 border border-[#2A2D32] hover:border-[#FFFFFF] text-[#8C929B] hover:text-[#FFFFFF]"
+                      className="px-2.5 py-1 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-medium transition-colors flex items-center gap-1"
                     >
-                      FOCUS {alert.vehicle_id}
+                      <Crosshair className="w-3 h-3 text-slate-400" />
+                      <span>Focus {alert.vehicle_id}</span>
                     </button>
                   )}
                   {!alert.acknowledged && (
                     <button
                       onClick={() => onAcknowledgeAlert(alert.id)}
-                      className="px-2 py-0.5 border border-[#4E6E5D] bg-[#4E6E5D]/20 text-[#8cd1aa] hover:bg-[#4E6E5D]/40"
+                      className="px-2.5 py-1 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 font-semibold transition-colors"
                     >
-                      ACK
+                      Acknowledge
                     </button>
                   )}
                 </div>

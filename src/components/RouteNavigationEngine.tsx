@@ -10,7 +10,9 @@ import {
   CheckSquare, 
   Square, 
   RefreshCw, 
-  Euro
+  Euro,
+  CheckCircle2,
+  Shuffle
 } from 'lucide-react';
 import { formatSpeed, formatCurrencyEur } from '../utils/formatters';
 
@@ -49,36 +51,38 @@ export const RouteNavigationEngine: React.FC<RouteNavigationEngineProps> = ({
     setTimeout(() => {
       onApplyDetour(
         currentVehicle.vehicle_id,
-        'Applied German BAB 61 / A6 bypass to avoid Leverkusen bridge weight restriction and A3 congestion'
+        'Applied German BAB 61 / A6 bypass to avoid bridge weight restriction and A3 congestion'
       );
-      setActiveDetourState('ALTERNATE TEN-T ROUTE DEPLOYED // TACHO & LKW MAUT UPDATED (+18 km, 0 Bridge Conflicts)');
+      setActiveDetourState('ALTERNATE TEN-T ROUTE DEPLOYED // TACHO & LKW MAUT UPDATED (+18 km, 0 Conflicts)');
       setTimeout(() => setActiveDetourState(null), 5000);
     }, 800);
   };
 
   return (
-    <div className="w-full bg-[#181A1D] border border-[#2A2D32] p-4 text-xs font-tabular space-y-4">
+    <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm p-5 font-sans space-y-5">
       {/* Module Title */}
-      <div className="flex flex-wrap items-center justify-between border-b border-[#2A2D32] pb-3 gap-2">
-        <div className="flex items-center gap-2">
-          <Navigation className="w-4 h-4 text-[#FFFFFF]" />
+      <div className="flex flex-wrap items-center justify-between border-b border-slate-200 pb-4 gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+            <Navigation className="w-5 h-5" />
+          </div>
           <div>
-            <h2 className="text-sm font-bold text-[#FFFFFF] tracking-wider uppercase">
-              EUROPEAN TEN-T ROUTE NAVIGATION // DIRECTIVE 96/53/EC & ADR COMPLIANCE
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">
+              European TEN-T Route Navigation & Detour Engine
             </h2>
-            <div className="text-[11px] text-[#8C929B]">
-              LKW MAUT · CRIT'AIR LOW EMISSION ZONES · ALPINE PASS SECTORAL RESTRICTIONS · ADR TUNNEL CAT A-E
-            </div>
+            <p className="text-xs text-slate-500">
+              Directive 96/53/EC Commercial Clearances · LKW-Maut & EETS Tolling · Alpine Pass Transit Curfews
+            </p>
           </div>
         </div>
 
         {/* Vehicle Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-[#8C929B]">ACTIVE HGV:</span>
+          <span className="text-xs font-medium text-slate-500">Active HGV:</span>
           <select
             value={currentVehicle.vehicle_id}
             onChange={(e) => onSelectVehicle(e.target.value)}
-            className="bg-[#0F1113] border border-[#2A2D32] px-2.5 py-1 text-xs text-[#E1E4E8] rounded-none focus:border-[#FFFFFF] focus:outline-none"
+            className="bg-slate-50 border border-slate-200 px-3 py-1.5 text-xs text-slate-800 rounded-lg focus:outline-none focus:border-blue-500 shadow-2xs font-semibold"
           >
             {vehicles.map((v) => (
               <option key={v.vehicle_id} value={v.vehicle_id}>
@@ -90,100 +94,100 @@ export const RouteNavigationEngine: React.FC<RouteNavigationEngineProps> = ({
       </div>
 
       {/* Origin / Destination Primary Metric Banner */}
-      <div className="bg-[#0F1113] border border-[#2A2D32] p-3">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2A2D32] pb-2 mb-2">
-          <div className="flex items-center gap-3">
+      <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-3">
+          <div className="flex items-center gap-4">
             <div>
-              <span className="text-[#8C929B] text-[10px]">ORIGIN (EU):</span>
-              <div className="text-[#FFFFFF] font-bold text-sm">{currentVehicle.active_route.origin_name}</div>
+              <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Origin (EU):</span>
+              <div className="text-slate-900 font-bold text-base">{currentVehicle.active_route.origin_name}</div>
             </div>
-            <span className="text-[#8C929B] font-bold text-base">───────►</span>
+            <span className="text-slate-300 font-bold text-lg">───────►</span>
             <div>
-              <span className="text-[#8C929B] text-[10px]">DESTINATION (EU):</span>
-              <div className="text-[#FFFFFF] font-bold text-sm">{currentVehicle.active_route.destination_name}</div>
+              <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Destination (EU):</span>
+              <div className="text-slate-900 font-bold text-base">{currentVehicle.active_route.destination_name}</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-tabular">
+          <div className="flex items-center gap-5 text-xs">
             <div>
-              <span className="text-[#8C929B]">CORRIDOR DISTANCE:</span>{' '}
-              <span className="text-[#FFFFFF] font-bold">{currentVehicle.active_route.total_distance_km} km</span>
+              <span className="text-slate-500 block text-[11px]">Corridor Distance:</span>
+              <span className="text-slate-900 font-bold text-sm font-mono">{currentVehicle.active_route.total_distance_km} km</span>
             </div>
             <div>
-              <span className="text-[#8C929B]">EST. DRIVE TIME:</span>{' '}
-              <span className="text-[#8cd1aa] font-bold">{currentVehicle.active_route.est_time_remaining}</span>
+              <span className="text-slate-500 block text-[11px]">Est. Drive Time:</span>
+              <span className="text-emerald-700 font-bold text-sm">{currentVehicle.active_route.est_time_remaining}</span>
             </div>
             <div>
-              <span className="text-[#8C929B]">EU TOLLS (MAUT/TELEPASS):</span>{' '}
-              <span className="text-[#E1E4E8] font-bold">{formatCurrencyEur(currentVehicle.active_route.toll_cost_eur)}</span>
+              <span className="text-slate-500 block text-[11px]">EU Tolls (Maut/Telepass):</span>
+              <span className="text-blue-700 font-bold text-sm font-mono">{formatCurrencyEur(currentVehicle.active_route.toll_cost_eur)}</span>
             </div>
           </div>
         </div>
 
-        {/* European Restrictions Filter Checkbox Bar */}
+        {/* European Restrictions Filter Bar */}
         <div>
-          <div className="text-[10px] text-[#8C929B] mb-1.5 uppercase tracking-wider font-semibold">
-            EUROPEAN DIRECTIVE 96/53/EC & ENVIRONMENTAL RESTRICTIONS:
+          <div className="text-[11px] text-slate-600 mb-2 uppercase tracking-wide font-semibold">
+            European Directive 96/53/EC & Environmental Constraints:
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-xs">
             <button
               onClick={() => toggleRestriction('lowClearance')}
-              className={`mta-btn p-2 border flex items-center gap-2 text-left ${
+              className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition-all ${
                 restrictions.lowClearance
-                  ? 'bg-[#2A2D32] border-[#FFFFFF] text-[#FFFFFF]'
-                  : 'bg-[#181A1D] border-[#2A2D32] text-[#8C929B]'
+                  ? 'bg-blue-50 border-blue-200 text-blue-900 shadow-2xs'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
-              {restrictions.lowClearance ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
-              <span>Clearance (&lt; 4.00m EU Standard)</span>
+              {restrictions.lowClearance ? <CheckSquare className="w-4 h-4 text-blue-600" /> : <Square className="w-4 h-4 text-slate-300" />}
+              <span className="font-medium">Clearance (&lt; 4.00m Standard)</span>
             </button>
 
             <button
               onClick={() => toggleRestriction('maxAxleWeight')}
-              className={`mta-btn p-2 border flex items-center gap-2 text-left ${
+              className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition-all ${
                 restrictions.maxAxleWeight
-                  ? 'bg-[#2A2D32] border-[#FFFFFF] text-[#FFFFFF]'
-                  : 'bg-[#181A1D] border-[#2A2D32] text-[#8C929B]'
+                  ? 'bg-blue-50 border-blue-200 text-blue-900 shadow-2xs'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
-              {restrictions.maxAxleWeight ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
-              <span>Drive Axle (&lt; 11.5t Limit)</span>
+              {restrictions.maxAxleWeight ? <CheckSquare className="w-4 h-4 text-blue-600" /> : <Square className="w-4 h-4 text-slate-300" />}
+              <span className="font-medium">Drive Axle (&lt; 11.5t Limit)</span>
             </button>
 
             <button
               onClick={() => toggleRestriction('adrRestricted')}
-              className={`mta-btn p-2 border flex items-center gap-2 text-left ${
+              className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition-all ${
                 restrictions.adrRestricted
-                  ? 'bg-[#2A2D32] border-[#FFFFFF] text-[#FFFFFF]'
-                  : 'bg-[#181A1D] border-[#2A2D32] text-[#8C929B]'
+                  ? 'bg-blue-50 border-blue-200 text-blue-900 shadow-2xs'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
-              {restrictions.adrRestricted ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
-              <span>ADR Dangerous Goods (Tunnel B/E)</span>
+              {restrictions.adrRestricted ? <CheckSquare className="w-4 h-4 text-blue-600" /> : <Square className="w-4 h-4 text-slate-300" />}
+              <span className="font-medium">ADR Tunnels (Cat B/E)</span>
             </button>
 
             <button
               onClick={() => toggleRestriction('critAirLez')}
-              className={`mta-btn p-2 border flex items-center gap-2 text-left ${
+              className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition-all ${
                 restrictions.critAirLez
-                  ? 'bg-[#2A2D32] border-[#FFFFFF] text-[#FFFFFF]'
-                  : 'bg-[#181A1D] border-[#2A2D32] text-[#8C929B]'
+                  ? 'bg-blue-50 border-blue-200 text-blue-900 shadow-2xs'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
-              {restrictions.critAirLez ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
-              <span>Crit'Air / LEZ (Euro 6 Mandatory)</span>
+              {restrictions.critAirLez ? <CheckSquare className="w-4 h-4 text-blue-600" /> : <Square className="w-4 h-4 text-slate-300" />}
+              <span className="font-medium">Crit'Air / LEZ Zones</span>
             </button>
 
             <button
               onClick={() => toggleRestriction('alpineTransit')}
-              className={`mta-btn p-2 border flex items-center gap-2 text-left ${
+              className={`p-2.5 rounded-xl border flex items-center gap-2 text-left transition-all ${
                 restrictions.alpineTransit
-                  ? 'bg-[#2A2D32] border-[#FFFFFF] text-[#FFFFFF]'
-                  : 'bg-[#181A1D] border-[#2A2D32] text-[#8C929B]'
+                  ? 'bg-blue-50 border-blue-200 text-blue-900 shadow-2xs'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
               }`}
             >
-              {restrictions.alpineTransit ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
-              <span>Alpine Sectoral Curfew (Brenner/CH)</span>
+              {restrictions.alpineTransit ? <CheckSquare className="w-4 h-4 text-blue-600" /> : <Square className="w-4 h-4 text-slate-300" />}
+              <span className="font-medium">Alpine Sectoral Ban (Brenner)</span>
             </button>
           </div>
         </div>
@@ -192,51 +196,51 @@ export const RouteNavigationEngine: React.FC<RouteNavigationEngineProps> = ({
       {/* Route Segments Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Left: Segment Turn-by-Turn & Architecture */}
-        <div className="bg-[#0F1113] border border-[#2A2D32] p-3 space-y-3">
-          <div className="flex items-center justify-between border-b border-[#2A2D32] pb-1.5">
-            <span className="font-bold text-[#FFFFFF] tracking-wider uppercase">
-              TEN-T CORRIDOR TOPOLOGY & SEGMENTS
+        <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+            <span className="font-bold text-xs text-slate-900 tracking-tight">
+              TEN-T Corridor Topology & Segments
             </span>
-            <span className="text-[#8C929B] text-[11px]">
-              STANDARD: 40 TONNES / 16.5m
+            <span className="text-slate-500 text-xs">
+              40 Tonnes / 16.5m Articulated
             </span>
           </div>
 
-          <div className="space-y-2">
-            <div className="p-2.5 bg-[#181A1D] border border-[#2A2D32]">
-              <div className="flex justify-between text-xs font-semibold text-[#FFFFFF] mb-1">
+          <div className="space-y-2.5">
+            <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
+              <div className="flex justify-between text-xs font-bold text-slate-900 mb-1">
                 <span>1. Cross-Country Motorway Axis (TEN-T Priority)</span>
-                <span>{Math.round(currentVehicle.active_route.total_distance_km * 0.8)} km @ {currentVehicle.active_route.avg_speed_kmh} km/h avg</span>
+                <span className="text-blue-600 font-mono">{Math.round(currentVehicle.active_route.total_distance_km * 0.8)} km @ {currentVehicle.active_route.avg_speed_kmh} km/h avg</span>
               </div>
-              <p className="text-[11px] text-[#8C929B]">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 Optimized for German LKW Maut / French Telepass OBU electronic tolling, automated WIM (weigh-in-motion), and Euro 6e low acoustic footprint.
               </p>
             </div>
 
-            <div className="p-2.5 bg-[#181A1D] border border-[#2A2D32]">
-              <div className="flex justify-between text-xs font-semibold text-[#FFFFFF] mb-1">
+            <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
+              <div className="flex justify-between text-xs font-bold text-slate-900 mb-1">
                 <span>2. Urban Distripark & Terminal Access</span>
-                <span>{Math.round(currentVehicle.active_route.total_distance_km * 0.2)} km @ 45 km/h avg</span>
+                <span className="text-blue-600 font-mono">{Math.round(currentVehicle.active_route.total_distance_km * 0.2)} km @ 45 km/h avg</span>
               </div>
-              <p className="text-[11px] text-[#8C929B]">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 Complies with European municipal delivery windows, Crit'Air vignette class 1/2, and bridge underpass clearances &gt; 4.10m.
               </p>
             </div>
           </div>
 
           {/* Waypoints sequence */}
-          <div className="pt-2 border-t border-[#2A2D32]">
-            <div className="text-[10px] text-[#8C929B] mb-1 uppercase font-semibold">
-              EUROPEAN WAYPOINTS & CUSTOMS / TOLL HUBS:
+          <div className="pt-2 border-t border-slate-200/80">
+            <div className="text-[11px] text-slate-500 font-semibold mb-1.5 uppercase">
+              European Waypoints & Toll Hubs:
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 bg-white p-2.5 rounded-xl border border-slate-200">
               {currentVehicle.active_route.waypoints.map((wp, idx) => (
-                <div key={idx} className="flex items-center justify-between text-[11px] py-0.5">
+                <div key={idx} className="flex items-center justify-between text-xs py-1 border-b border-slate-100 last:border-b-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[#8C929B] font-mono">[{wp.country}]</span>
-                    <span className="text-[#E1E4E8]">{wp.name}</span>
+                    <span className="text-blue-600 font-mono font-bold text-[11px]">[{wp.country}]</span>
+                    <span className="text-slate-800 font-medium">{wp.name}</span>
                   </div>
-                  <span className="text-[#8C929B] uppercase text-[10px]">
+                  <span className="text-slate-400 uppercase text-[10px] font-semibold bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">
                     {wp.type || 'WAYPOINT'}
                   </span>
                 </div>
@@ -246,50 +250,59 @@ export const RouteNavigationEngine: React.FC<RouteNavigationEngineProps> = ({
         </div>
 
         {/* Right: Live Alpine & Weather Radar */}
-        <div className="bg-[#0F1113] border border-[#2A2D32] p-3 space-y-3 flex flex-col justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between border-b border-[#2A2D32] pb-1.5">
-              <span className="font-bold text-[#FFFFFF] tracking-wider uppercase flex items-center gap-1.5">
-                <CloudSnow className="w-3.5 h-3.5 text-[#e5bf7d]" />
-                TRANS-ALPINE WEATHER & PASS MONITOR
+        <div className="p-4 bg-slate-50/70 border border-slate-200 rounded-xl space-y-3 flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+              <span className="font-bold text-xs text-slate-900 tracking-tight flex items-center gap-1.5">
+                <CloudSnow className="w-4 h-4 text-blue-600" />
+                Live Alpine Weather & Pass Radar
               </span>
-              <span className="text-[#e5bf7d] text-[10px] font-bold">
-                RADAR ONLINE
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                Advisory Active
               </span>
             </div>
 
-            <div className="p-3 bg-[#181A1D] border border-[#8C734B] space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold text-[#e5bf7d]">
-                <AlertTriangle className="w-4 h-4" />
-                <span>ACTIVE ADVISORY: BRENNER A13 & GOTTHARD TRANSIT</span>
+            {/* Alpine Status Card */}
+            <div className="p-3.5 bg-amber-50/80 border border-amber-200 rounded-xl space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Brenner Pass (A13 / A22): Snow Chain Requirement & Sectoral Ban</span>
               </div>
-              <p className="text-[11px] text-[#E1E4E8]">
-                {currentVehicle.active_route.weather_hazard
-                  ? `${currentVehicle.active_route.weather_hazard.location} — ${currentVehicle.active_route.weather_hazard.description}`
-                  : 'Austrian ASFINAG sectoral night-driving ban active on A13 for non-Euro 6 vehicles. German A3 Leverkusen bridge weight sensor limit enforced.'}
+              <p className="text-xs text-amber-800 leading-relaxed">
+                Alpine elevation 1,374m: Heavy snowfall between Innsbruck and Bolzano. Mandatory snow chain fitment for drive axles (&gt;3.5t). Sectoral transit ban active for non-Euro 6e freight combinations.
               </p>
-              <div className="text-[10px] text-[#8C929B]">
-                SYSTEM IMPACT: AdBlue consumption nominal. Tachograph remaining drive window: verified under EC 561/2006.
+              <div className="text-[11px] text-amber-700 font-medium pt-1 border-t border-amber-200/60">
+                Impact: +45m transit delay on direct Verona vector.
               </div>
             </div>
 
-            {activeDetourState && (
-              <div className="p-2.5 bg-[#4E6E5D]/20 border border-[#4E6E5D] text-[#8cd1aa] text-xs font-bold">
-                {activeDetourState}
+            {/* Alternate Recommendation */}
+            <div className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-900">Recommended European Detour:</span>
+                <span className="text-emerald-700 font-semibold text-[11px]">Clean Clearance</span>
               </div>
-            )}
+              <p className="text-xs text-slate-600">
+                Reroute via Tauern Autobahn (A10) or Swiss Gotthard Tunnel corridor. Clears all low emission restrictions and bypasses Kufstein block handling.
+              </p>
+            </div>
           </div>
 
-          <div className="pt-3 border-t border-[#2A2D32] flex items-center justify-between gap-2">
-            <span className="text-[11px] text-[#8C929B]">
-              TOLL & EMISSION CALCULATION: ACTIVE
-            </span>
+          {/* Action Trigger */}
+          <div className="pt-3 border-t border-slate-200/80 space-y-2">
+            {activeDetourState && (
+              <div className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>{activeDetourState}</span>
+              </div>
+            )}
+
             <button
               onClick={handleRecalculateAlternate}
-              className="mta-btn px-4 py-2 bg-[#FFFFFF] border border-[#FFFFFF] hover:bg-[#E1E4E8] text-[#0F1113] text-xs font-bold flex items-center gap-1.5 shadow-[0_0_10px_rgba(255,255,255,0.15)]"
+              className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>RECALCULATE TEN-T ALTERNATE CORRIDOR</span>
+              <Shuffle className="w-4 h-4" />
+              <span>Deploy Alternate TEN-T Bypass Route to HGV Cab</span>
             </button>
           </div>
         </div>

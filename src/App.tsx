@@ -26,6 +26,7 @@ import { DispatchAssignmentEngine } from './components/DispatchAssignmentEngine'
 import { CapacityPayloadMatrix } from './components/CapacityPayloadMatrix';
 import { DriverAnalyticsDashboard } from './components/DriverAnalyticsDashboard';
 import { DigitalBolModal } from './components/DigitalBolModal';
+import { NewPackageEntryModal } from './components/NewPackageEntryModal';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveNavTab>('CONSOLE');
@@ -37,6 +38,7 @@ export default function App() {
 
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>(INITIAL_VEHICLES[0]?.vehicle_id || 'HGV-DE-4092');
   const [activeBolManifestId, setActiveBolManifestId] = useState<string | null>(null);
+  const [isNewPackageModalOpen, setIsNewPackageModalOpen] = useState<boolean>(false);
   const [isSimulating, setIsSimulating] = useState<boolean>(true);
   const [quotaExceeded, setQuotaExceeded] = useState<boolean>(false);
 
@@ -190,6 +192,23 @@ export default function App() {
   const bolManifest = manifests.find((m) => m.manifest_id === activeBolManifestId) || null;
   const bolVehicle = bolManifest ? vehicles.find((v) => v.vehicle_id === bolManifest.assignment_status.assigned_vehicle) || null : null;
   const bolDriver = bolManifest ? drivers.find((d) => d.driver_id === bolManifest.assignment_status.assigned_driver) || null : null;
+
+  // New Package Creation Handler
+  const handleCreatePackage = (newManifest: Manifest) => {
+    setManifests((prev) => [newManifest, ...prev]);
+
+    // Push notification alert
+    const newAlert: SystemAlert = {
+      id: `ALT-${Date.now()}`,
+      timestamp: new Date().toLocaleTimeString('en-GB', { hour12: false, timeZone: 'CET' }) + ' CET',
+      type: 'ROUTE_UPDATE',
+      severity: 'info',
+      title: 'New Package Load Registered',
+      description: `Package "${newManifest.cargo_description}" registered (${newManifest.metrics.euro_pallets_count} EPAL / ${newManifest.metrics.total_mass_kg} kg). e-CMR ${newManifest.ecmr_number} issued. Ready for dispatch assignment.`,
+      acknowledged: false,
+    };
+    setAlerts((prev) => [newAlert, ...prev]);
+  };
 
   // European Dispatch Manifest Assignment Handler with EC 561/2006 & Directive 96/53/EC Validation Logic
   const handleAssignManifest = (
@@ -376,10 +395,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F1113] text-[#E1E4E8] flex flex-col font-sans select-none antialiased">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans select-none antialiased">
       {/* Google Maps Quota Defense Banner */}
       {quotaExceeded && (
-        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2.5 text-xs md:text-sm text-center sticky top-0 z-50 shadow-sm">
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2.5 text-xs md:text-sm text-center sticky top-0 z-50 shadow-xs">
           <span>
             Google Maps Platform quota reached. If you are the app owner, visit{' '}
             <a
@@ -395,11 +414,12 @@ export default function App() {
         </div>
       )}
 
-      {/* Top Bar Contract (Brand, Logged Operator, CET Clock, EC 561/2006 Status, Simulation Toggle) */}
+      {/* Top Bar Header */}
       <Header
         isSimulating={isSimulating}
         setIsSimulating={setIsSimulating}
         onResetData={handleResetData}
+        onOpenNewPackageModal={() => setIsNewPackageModalOpen(true)}
         operatorName="OP-102 (Miller)"
       />
 
@@ -412,24 +432,24 @@ export default function App() {
       />
 
       {/* Main Operational Viewport */}
-      <main className="flex-1 p-3 max-w-[1920px] mx-auto w-full space-y-3">
+      <main className="flex-1 p-4 max-w-[1920px] mx-auto w-full space-y-4">
         {/* Tab 0: Primary Console Wireframe */}
         {activeTab === 'CONSOLE' && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {/* Top Split: Section A (Vector Map) + Section B (Fleet Telemetry List) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
               {/* SECTION A: REAL-TIME VECTOR MAP ENGINE */}
               <div className="lg:col-span-8 flex flex-col">
                 <GlobalVectorMap
                   vehicles={vehicles}
                   selectedVehicleId={selectedVehicleId}
                   onSelectVehicle={setSelectedVehicleId}
-                  heightClass="h-[460px]"
+                  heightClass="h-[480px]"
                 />
               </div>
 
               {/* SECTION B: EUROPEAN FLEET TELEMETRY & CONTROL */}
-              <div className="lg:col-span-4 flex flex-col h-[460px]">
+              <div className="lg:col-span-4 flex flex-col h-[480px]">
                 <FleetTelemetryList
                   vehicles={vehicles}
                   selectedVehicleId={selectedVehicleId}
@@ -441,7 +461,7 @@ export default function App() {
             </div>
 
             {/* Middle Split: Section C (Selected Cargo & Payload) + Section D (Assignment Control Panel) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* SECTION C: SELECTED CARGO & PAYLOAD METRICS */}
               <SelectedCargoInspector
                 vehicle={selectedVehicle}
@@ -472,12 +492,12 @@ export default function App() {
 
         {/* Tab 1: Global Vector Map Engine View */}
         {activeTab === 'GLOBAL_MAP' && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <GlobalVectorMap
               vehicles={vehicles}
               selectedVehicleId={selectedVehicleId}
               onSelectVehicle={setSelectedVehicleId}
-              heightClass="h-[760px]"
+              heightClass="h-[780px]"
             />
           </div>
         )}
@@ -500,6 +520,7 @@ export default function App() {
             drivers={drivers}
             onAssignManifest={handleAssignManifest}
             onOpenBolModal={(manifestId) => setActiveBolManifestId(manifestId)}
+            onOpenNewPackageModal={() => setIsNewPackageModalOpen(true)}
           />
         )}
 
@@ -532,21 +553,28 @@ export default function App() {
         />
       )}
 
-      {/* Minimal European Footer */}
-      <footer className="w-full bg-[#181A1D] border-t border-[#2A2D32] px-4 py-2 flex flex-wrap items-center justify-between text-[11px] font-tabular text-[#8C929B]">
+      {/* New Package & Consignment Entry Modal */}
+      <NewPackageEntryModal
+        isOpen={isNewPackageModalOpen}
+        onClose={() => setIsNewPackageModalOpen(false)}
+        onCreatePackage={handleCreatePackage}
+      />
+
+      {/* Modern European Footer */}
+      <footer className="w-full bg-white border-t border-slate-200 px-6 py-3 flex flex-wrap items-center justify-between text-xs text-slate-500 shadow-2xs">
         <div className="flex items-center gap-3">
-          <span>STACKY CONTROL CORE v3.8</span>
+          <span className="font-semibold text-slate-700">STACKY Logistics Terminal v3.8</span>
           <span>·</span>
-          <span>WGS-84 MERCATOR</span>
+          <span>WGS-84 Mercator</span>
           <span>·</span>
-          <span className="text-[#8cd1aa]">
-            EU REGULATION (EC) NO 561/2006 · DIRECTIVE 96/53/EC · GENEVA e-CMR PROTOCOL COMPLIANT
+          <span className="text-emerald-700 font-medium">
+            EU Regulation (EC) No 561/2006 · Directive 96/53/EC · Geneva e-CMR Protocol
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <span>LATENCY: 16ms</span>
+          <span>Latency: 16ms</span>
           <span>·</span>
-          <span className="text-[#8cd1aa]">MQTT BROKER: CONNECTED (10Hz)</span>
+          <span className="text-emerald-700 font-medium">MQTT In-Cab Broker: Connected (10Hz)</span>
         </div>
       </footer>
     </div>

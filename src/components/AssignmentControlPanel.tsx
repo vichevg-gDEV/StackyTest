@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Vehicle, Manifest, Driver } from '../types';
-import { Send, Shuffle, CheckCircle, AlertTriangle, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Send, Shuffle, CheckCircle, AlertTriangle, ShieldAlert, ShieldCheck, FileCheck, Navigation } from 'lucide-react';
 import { formatMass } from '../utils/formatters';
 
 interface AssignmentControlPanelProps {
@@ -84,25 +84,30 @@ export const AssignmentControlPanel: React.FC<AssignmentControlPanelProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#181A1D] border border-[#2A2D32] flex flex-col font-tabular">
+    <div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="px-3 py-2 border-b border-[#2A2D32] flex items-center justify-between gap-2">
+      <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between gap-2 bg-slate-50/50">
         <div className="flex items-center gap-2">
-          <Send className="w-3.5 h-3.5 text-[#E1E4E8]" />
-          <span className="font-semibold text-xs text-[#FFFFFF] tracking-wider uppercase">
-            SECTION D: EUROPEAN ASSIGNMENT CONTROL PANEL
-          </span>
+          <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+            <Send className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="font-bold text-xs text-slate-900 tracking-tight">
+              Assignment & Dispatch Control
+            </h3>
+            <span className="text-[10px] text-slate-500">e-CMR Consignment Transmission & Driver Dispatch</span>
+          </div>
         </div>
-        <span className="text-[11px] text-[#8C929B]">
-          TARGET UNIT: <span className="text-[#FFFFFF] font-bold">{targetVehicleId}</span>
+        <span className="text-xs text-slate-500 font-medium">
+          Target Unit: <strong className="text-slate-800 font-mono">{targetVehicleId}</strong>
         </span>
       </div>
 
-      <div className="p-3 space-y-3 text-xs">
+      <div className="p-4 space-y-3.5 text-xs">
         {/* Select Pending Manifest */}
         <div>
-          <label className="block text-[11px] text-[#8C929B] mb-1">
-            SELECT PENDING e-CMR CONSIGNMENT:
+          <label className="block text-xs font-medium text-slate-700 mb-1">
+            Select Pending e-CMR Consignment:
           </label>
           <select
             value={selectedManifestId}
@@ -110,26 +115,26 @@ export const AssignmentControlPanel: React.FC<AssignmentControlPanelProps> = ({
               setSelectedManifestId(e.target.value);
               setValidationResult({ tested: false, success: true, messages: [] });
             }}
-            className="w-full bg-[#0F1113] border border-[#2A2D32] px-2.5 py-1.5 text-xs text-[#E1E4E8] focus:border-[#FFFFFF] focus:outline-none rounded-none"
+            className="w-full bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-800 rounded-lg focus:outline-none focus:bg-white focus:border-blue-500 shadow-2xs font-medium"
           >
             {manifests.map((m) => (
               <option key={m.manifest_id} value={m.manifest_id}>
-                [{m.manifest_id}] {m.cargo_description.slice(0, 36)}... | {m.metrics.euro_pallets_count} EPAL | {formatMass(m.metrics.total_mass_kg)} | {m.origin_code} → {m.destination_code}
+                [{m.manifest_id}] {m.cargo_description.slice(0, 38)}... | {m.metrics.euro_pallets_count} EPAL | {formatMass(m.metrics.total_mass_kg)} | {m.origin_code} → {m.destination_code}
               </option>
             ))}
           </select>
         </div>
 
         {/* Select Target Vehicle & Driver */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-[11px] text-[#8C929B] mb-1">
-              ASSIGNED EUROPEAN HGV:
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Assigned European HGV:
             </label>
             <select
               value={targetVehicleId}
               onChange={(e) => setTargetVehicleId(e.target.value)}
-              className="w-full bg-[#0F1113] border border-[#2A2D32] px-2.5 py-1.5 text-xs text-[#E1E4E8] focus:border-[#FFFFFF] focus:outline-none rounded-none"
+              className="w-full bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-800 rounded-lg focus:outline-none focus:bg-white focus:border-blue-500 shadow-2xs font-medium"
             >
               {vehicles.map((v) => (
                 <option key={v.vehicle_id} value={v.vehicle_id}>
@@ -140,19 +145,19 @@ export const AssignmentControlPanel: React.FC<AssignmentControlPanelProps> = ({
           </div>
 
           <div>
-            <label className="block text-[11px] text-[#8C929B] mb-1">
-              TARGET DRIVER (EC 561/2006 AUDIT):
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Assigned Driver (Tachograph Audit):
             </label>
             <select
               value={targetDriverId}
               onChange={(e) => setTargetDriverId(e.target.value)}
-              className="w-full bg-[#0F1113] border border-[#2A2D32] px-2.5 py-1.5 text-xs text-[#E1E4E8] focus:border-[#FFFFFF] focus:outline-none rounded-none"
+              className="w-full bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-800 rounded-lg focus:outline-none focus:bg-white focus:border-blue-500 shadow-2xs font-medium"
             >
               {drivers.map((d) => {
                 const contLeftMins = Math.max(0, 270 - d.continuous_drive_minutes);
                 return (
                   <option key={d.driver_id} value={d.driver_id}>
-                    {d.driver_name} [{d.country}] (Drive Rem: {Math.floor(contLeftMins / 60)}h {contLeftMins % 60}m {d.tacho_status === 'BREAK_DUE' ? '[BREAK DUE]' : ''})
+                    {d.driver_name} [{d.country}] (Drive Rem: {Math.floor(contLeftMins / 60)}h {contLeftMins % 60}m {d.tacho_status === 'BREAK_DUE' ? '⚠️ BREAK DUE' : '✅'})
                   </option>
                 );
               })}
@@ -163,27 +168,27 @@ export const AssignmentControlPanel: React.FC<AssignmentControlPanelProps> = ({
         {/* Instant Validation Feedback Box */}
         {validationResult.tested && (
           <div
-            className={`p-2.5 border text-[11px] space-y-1 ${
+            className={`p-3 rounded-xl border text-xs space-y-1 ${
               validationResult.success
-                ? 'bg-[#4E6E5D]/15 border-[#4E6E5D] text-[#8cd1aa]'
-                : 'bg-[#7A3E3E]/20 border-[#7A3E3E] text-[#e88d8d]'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                : 'bg-rose-50 border-rose-200 text-rose-900'
             }`}
           >
-            <div className="font-bold flex items-center gap-1.5">
+            <div className="font-semibold flex items-center gap-1.5">
               {validationResult.success ? (
                 <>
-                  <CheckCircle className="w-3.5 h-3.5" />
-                  <span>PRE-DISPATCH EUROPEAN LOGIC CHECKS PASSED:</span>
+                  <CheckCircle className="w-4 h-4 text-emerald-600" />
+                  <span>Pre-Dispatch European Regulatory Checks Passed:</span>
                 </>
               ) : (
                 <>
-                  <ShieldAlert className="w-3.5 h-3.5" />
-                  <span>EUROPEAN REGULATORY VIOLATION DETECTED:</span>
+                  <ShieldAlert className="w-4 h-4 text-rose-600" />
+                  <span>European Regulatory Violation Detected:</span>
                 </>
               )}
             </div>
             {validationResult.messages.map((msg, i) => (
-              <div key={i} className="pl-4">
+              <div key={i} className="pl-5 text-[11px] text-slate-700">
                 • {msg}
               </div>
             ))}
@@ -192,36 +197,38 @@ export const AssignmentControlPanel: React.FC<AssignmentControlPanelProps> = ({
 
         {/* Sync notification message */}
         {syncStatus && (
-          <div className="p-2 bg-[#4E6E5D]/20 border border-[#4E6E5D] text-[#8cd1aa] text-[11px] font-bold text-center">
-            {syncStatus}
+          <div className="p-2.5 bg-blue-50 border border-blue-200 text-blue-900 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-blue-600" />
+            <span>{syncStatus}</span>
           </div>
         )}
 
         {/* Action Triggers */}
-        <div className="pt-2 border-t border-[#2A2D32] flex flex-wrap items-center gap-2">
+        <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-2.5">
           <button
             onClick={handleQuickReroute}
-            className="mta-btn px-3 py-2 bg-[#181A1D] border border-[#2A2D32] hover:border-[#E1E4E8] text-[#8C929B] hover:text-[#FFFFFF] text-xs flex-1 flex items-center justify-center gap-1.5"
+            className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-xl text-xs font-semibold flex-1 flex items-center justify-center gap-1.5 shadow-2xs transition-colors"
           >
-            <Shuffle className="w-3.5 h-3.5" />
-            <span>TEN-T RE-ROUTE</span>
+            <Navigation className="w-3.5 h-3.5" />
+            <span>TEN-T Reroute</span>
           </button>
 
           <button
             onClick={handleExecuteAssignment}
-            className="mta-btn px-4 py-2 bg-[#FFFFFF] border border-[#FFFFFF] hover:bg-[#E1E4E8] text-[#0F1113] text-xs font-bold flex-1 sm:flex-initial flex items-center justify-center gap-1.5 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex-1 sm:flex-initial flex items-center justify-center gap-2 shadow-sm transition-all"
           >
             <Send className="w-3.5 h-3.5" />
-            <span>TRANSMIT e-CMR</span>
+            <span>Transmit e-CMR</span>
           </button>
 
           {onOpenBolModal && (
             <button
               onClick={() => onOpenBolModal(selectedManifestId)}
-              className="mta-btn px-2.5 py-2 bg-[#181A1D] border border-[#2A2D32] hover:border-[#FFFFFF] text-[#8C929B] hover:text-[#FFFFFF] text-xs"
+              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center gap-1"
               title="Inspect Electronic Consignment Note (e-CMR)"
             >
-              VIEW e-CMR
+              <FileCheck className="w-3.5 h-3.5" />
+              <span>Inspect e-CMR</span>
             </button>
           )}
         </div>

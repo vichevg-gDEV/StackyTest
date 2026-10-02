@@ -2,152 +2,87 @@
 
 @layer base {
   :root {
-    --canvas-obsidian: #0F1113;
-    --panel-graphite: #181A1D;
-    --border-slate: #2A2D32;
-    --text-silver: #E1E4E8;
-    --text-muted: #8C929B;
-    --accent-white: #FFFFFF;
-    --status-active: #4E6E5D;
-    --status-warn: #8C734B;
-    --status-alert: #7A3E3E;
+    --canvas-bg: #F8FAFC;
+    --card-bg: #FFFFFF;
+    --card-border: #E2E8F0;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #64748B;
+    --brand-primary: #2563EB;
+    --brand-primary-hover: #1D4ED8;
+    --status-active: #059669;
+    --status-warn: #D97706;
+    --status-alert: #DC2626;
   }
 
   body {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: var(--canvas-obsidian);
-    color: var(--text-silver);
+    background-color: var(--canvas-bg);
+    color: var(--text-primary);
     margin: 0;
     padding: 0;
     overflow-x: hidden;
   }
 
-  /* Monospace tabular metrics everywhere specified */
   .font-tabular {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-variant-numeric: tabular-nums;
   }
 }
 
-/* 16px x 16px pitch hairline tactical grid overlay */
-.hud-grid {
-  background-image: 
-    linear-gradient(to right, rgba(225, 228, 232, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(225, 228, 232, 0.05) 1px, transparent 1px);
-  background-size: 16px 16px;
+/* Clean, modern card and button primitives with rounded edges */
+.card-clean {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.75rem; /* 12px */
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.hud-grid-dense {
-  background-image: 
-    linear-gradient(to right, rgba(225, 228, 232, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(225, 228, 232, 0.08) 1px, transparent 1px);
-  background-size: 8px 8px;
+.card-clean:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
 }
 
-/* Sharp edge containers (0px radius rule) and smooth 180ms cubic transitions */
-.mta-card {
-  border-radius: 0px !important;
-  background-color: #181A1D;
-  border: 1px solid #2A2D32;
-  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.mta-card:hover {
-  border-color: #3e444d;
-}
-
-.mta-btn {
-  border-radius: 0px !important;
-  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.mta-btn-primary {
-  background-color: #181A1D;
-  border: 1px solid #2A2D32;
-  color: #E1E4E8;
-}
-
-.mta-btn-primary:hover {
-  background-color: #2A2D32;
-  border-color: #E1E4E8;
-  color: #FFFFFF;
-}
-
-.mta-btn-active {
-  background-color: #2A2D32;
-  border: 1px solid #FFFFFF;
-  color: #FFFFFF;
-}
-
-/* Custom scrollbars */
+/* Custom scrollbars - subtle and clean */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0F1113;
+  background: #F1F5F9;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2A2D32;
-  border-radius: 0px;
+  background: #CBD5E1;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4A4F57;
+  background: #94A3B8;
 }
 
-/* Leaflet MTA Dark Customizations */
+/* Leaflet Container styling for light clean theme */
 .leaflet-container {
-  background: #0F1113 !important;
-  font-family: 'JetBrains Mono', monospace !important;
+  background: #E2E8F0 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  border-radius: 0.75rem;
 }
 
 .leaflet-control-zoom {
-  border: 1px solid #2A2D32 !important;
-  border-radius: 0px !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 0.5rem !important;
   overflow: hidden;
-  box-shadow: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
 }
 
 .leaflet-control-zoom a {
-  background-color: #181A1D !important;
-  color: #E1E4E8 !important;
-  border-bottom: 1px solid #2A2D32 !important;
-  border-radius: 0px !important;
-  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #FFFFFF !important;
+  color: #334155 !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  transition: background-color 150ms ease;
 }
 
 .leaflet-control-zoom a:hover {
-  background-color: #2A2D32 !important;
-  color: #FFFFFF !important;
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
 }
-
-.leaflet-popup-content-wrapper {
-  background: #181A1D !important;
-  color: #E1E4E8 !important;
-  border: 1px solid #FFFFFF !important;
-  border-radius: 0px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8) !important;
-  padding: 0 !important;
-}
-
-.leaflet-popup-content {
-  margin: 0 !important;
-  line-height: 1.4 !important;
-}
-
-.leaflet-popup-tip-container {
-  display: none !important;
-}
-
-.leaflet-control-attribution {
-  background: rgba(15, 17, 19, 0.8) !important;
-  color: #8C929B !important;
-  font-size: 9px !important;
-  border: 1px solid #2A2D32 !important;
-  border-radius: 0px !important;
-}
-
-.leaflet-control-attribution a {
-  color: #8C929B !important;
-}
-
